@@ -26,6 +26,10 @@ public final class SerbianTransliteratorTest {
                 "Tačka oslonca i decimalni zarez ostaju reči znak tačka"),
                 "Тачка ослонца и децимални зарез остају речи.");
 
+        expect(SerbianTransliterator.convert(
+                "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
+                "Данас су џем и ђак на столу. Ђак је стигао.");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }
