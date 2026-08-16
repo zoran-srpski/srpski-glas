@@ -23,9 +23,12 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public final class SerbianVoiceInputMethod extends InputMethodService
         implements RecognitionListener {
+    private static final Pattern WHITESPACE_BEFORE_CLOSING_PUNCTUATION =
+            Pattern.compile("[ \\t\\u00a0]+([.,!?:;%\\)\\]\\}])");
     private SpeechRecognizer recognizer;
     private Button micButton;
     private Button scriptButton;
@@ -372,6 +375,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         String converted = latinScript
                 ? SerbianTransliterator.convertLatin(matches.get(0))
                 : SerbianTransliterator.convert(matches.get(0));
+        converted = normalizePunctuationSpacing(converted);
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) {
             if (!startsNewSentence(connection)) {
@@ -381,6 +385,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
         finishListening("Унето — настављам да слушам…");
         continueListening();
+    }
+
+    private String normalizePunctuationSpacing(String text) {
+        return WHITESPACE_BEFORE_CLOSING_PUNCTUATION
+                .matcher(text)
+                .replaceAll("$1");
     }
 
     private boolean startsNewSentence(InputConnection connection) {
