@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
+import android.os.Build;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.inputmethod.InputConnection;
 import android.widget.Button;
 import android.widget.TextView;
@@ -24,6 +26,22 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public View onCreateInputView() {
         View view = getLayoutInflater().inflate(R.layout.keyboard_voice, null);
+        final int left = view.getPaddingLeft();
+        final int top = view.getPaddingTop();
+        final int right = view.getPaddingRight();
+        final int bottom = view.getPaddingBottom();
+        view.setOnApplyWindowInsetsListener((v, insets) -> {
+            int navigationBottom;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                navigationBottom = insets.getInsets(
+                        WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                navigationBottom = insets.getSystemWindowInsetBottom();
+            }
+            v.setPadding(left, top, right, bottom + navigationBottom);
+            return insets;
+        });
+        view.requestApplyInsets();
         status = view.findViewById(R.id.keyboardStatus);
         micButton = view.findViewById(R.id.keyboardMicButton);
         Button switchButton = view.findViewById(R.id.switchKeyboardButton);
