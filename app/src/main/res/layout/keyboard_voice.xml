@@ -5,14 +5,6 @@
     android:orientation="vertical"
     android:padding="12dp"
     android:background="#F6F4EE">
-    <TextView
-        android:id="@+id/keyboardStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Српски глас — спреман"
-        android:textColor="#52615B"
-        android:textSize="15sp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="58dp"
