@@ -20,7 +20,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 public final class SerbianVoiceInputMethod extends InputMethodService
         implements RecognitionListener {
     private SpeechRecognizer recognizer;
-    private TextView status;
     private Button micButton;
     private Button scriptButton;
     private Button symbolsButton;
@@ -77,7 +75,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             return insets;
         });
         view.requestApplyInsets();
-        status = view.findViewById(R.id.keyboardStatus);
         micButton = view.findViewById(R.id.keyboardMicButton);
         Button switchButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
@@ -356,7 +353,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void showStatus(String text) {
-        if (status != null) status.setText(text);
+        if (micButton != null && continuousMode) micButton.setText(text);
     }
 
     private void finishListening(String message) {
