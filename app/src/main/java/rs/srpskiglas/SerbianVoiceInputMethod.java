@@ -199,7 +199,32 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void commitText(String value) {
         stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
-        if (connection != null) connection.commitText(value, 1);
+        if (connection == null) return;
+        if (isClosingPunctuation(value)) {
+            removeWhitespaceBeforeCursor(connection);
+        }
+        connection.commitText(value, 1);
+    }
+
+    private boolean isClosingPunctuation(String value) {
+        return ".".equals(value) || ",".equals(value)
+                || "!".equals(value) || "?".equals(value)
+                || ":".equals(value) || ";".equals(value)
+                || "%".equals(value) || ")".equals(value)
+                || "]".equals(value) || "}".equals(value);
+    }
+
+    private void removeWhitespaceBeforeCursor(
+            InputConnection connection) {
+        CharSequence before = connection.getTextBeforeCursor(32, 0);
+        if (before == null) return;
+        int count = 0;
+        for (int i = before.length() - 1; i >= 0; i--) {
+            char c = before.charAt(i);
+            if (c != ' ' && c != '\t') break;
+            count++;
+        }
+        if (count > 0) connection.deleteSurroundingText(count, 0);
     }
 
     private void pressEditorAction() {
