@@ -144,8 +144,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void toggleScript() {
         latinScript = !latinScript;
         scriptButton.setText(latinScript ? "Lat" : "Ћир");
+        if (!continuousMode) micButton.setText(dictationButtonLabel());
         buildLetterRows();
-        showStatus(latinScript ? "Српска латиница" : "Српска ћирилица");
+        showStatus(latinScript
+                ? "Латиница — пиши или диктирај"
+                : "Ћирилица — пиши или диктирај");
+    }
+
+    private String dictationButtonLabel() {
+        return latinScript
+                ? "🎙  Диктирај латиницом"
+                : "🎙  Диктирај ћирилицом";
     }
 
     private void toggleShift() {
@@ -182,14 +191,14 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             continuousMode = false;
-            micButton.setText("🎙  Диктирај ћирилицом");
+            micButton.setText(dictationButtonLabel());
             Toast.makeText(this, "Отвори Српски глас и дозволи микрофон.",
                     Toast.LENGTH_LONG).show();
             return;
         }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             continuousMode = false;
-            micButton.setText("🎙  Диктирај ћирилицом");
+            micButton.setText(dictationButtonLabel());
             showStatus("Препознавање говора није доступно");
             return;
         }
@@ -215,7 +224,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         listening = false;
         handler.removeCallbacksAndMessages(null);
         if (recognizer != null) recognizer.cancel();
-        if (micButton != null) micButton.setText("🎙  Диктирај ћирилицом");
+        if (micButton != null) micButton.setText(dictationButtonLabel());
         showStatus("Заустављено — спреман");
     }
 
@@ -245,7 +254,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             continueListening();
             return;
         }
-        String converted = SerbianTransliterator.convert(matches.get(0));
+        String converted = latinScript
+                ? SerbianTransliterator.convertLatin(matches.get(0))
+                : SerbianTransliterator.convert(matches.get(0));
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) connection.commitText(converted + " ", 1);
         finishListening("Унето — настављам да слушам…");

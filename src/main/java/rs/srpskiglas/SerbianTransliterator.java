@@ -18,6 +18,13 @@ public final class SerbianTransliterator {
         return transliterate(normalized);
     }
 
+    /** Keeps Serbian Latin output while applying the same repairs and punctuation commands. */
+    public static String convertLatin(String dictatedText) {
+        if (dictatedText == null || dictatedText.trim().isEmpty()) return "";
+        String normalized = repairRecognition(dictatedText.trim());
+        return applySpokenPunctuation(normalized);
+    }
+
     static String repairRecognition(String text) {
         // A frequent Google STT omission observed in the baseline test.
         String repaired = text.replaceAll("(?iu)\\bkonjukcij", "konjunkcij");

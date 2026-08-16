@@ -34,6 +34,10 @@ public final class SerbianTransliteratorTest {
                 "Da li dolaziš znak pitanja"),
                 "Да ли долазиш?");
 
+        expect(SerbianTransliterator.convertLatin(
+                "Da li dolaziš znak pitanja"),
+                "Da li dolaziš?");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }
