@@ -38,6 +38,15 @@
         <Button android:id="@+id/semicolonButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text=";" android:textSize="17sp" />
     </LinearLayout>
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:orientation="horizontal">
+        <Button android:id="@+id/pasteButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="Налепи" android:textAllCaps="false" android:textSize="13sp" />
+        <Button android:id="@+id/copyButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="Копирај" android:textAllCaps="false" android:textSize="13sp" />
+        <Button android:id="@+id/cutButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="Исеци" android:textAllCaps="false" android:textSize="13sp" />
+        <Button android:id="@+id/selectAllButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="Све" android:textAllCaps="false" android:textSize="13sp" />
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/functionRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

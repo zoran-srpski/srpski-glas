@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.KeyEvent;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -32,10 +33,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button shiftButton;
     private LinearLayout letterRows;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler keyHandler = new Handler(Looper.getMainLooper());
     private boolean continuousMode;
     private boolean listening;
     private boolean latinScript;
     private boolean shifted;
+    private final Runnable repeatBackspace = new Runnable() {
+        @Override public void run() {
+            deleteOneCharacter();
+            keyHandler.postDelayed(this, 65);
+        }
+    };
 
     private static final String[] CYRILLIC_ROWS = {
             "љњертзуиопш", "асдфгхјклчћ", "џђцвбнмж"
@@ -78,9 +86,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button hyphen = view.findViewById(R.id.hyphenButton);
         Button colon = view.findViewById(R.id.colonButton);
         Button semicolon = view.findViewById(R.id.semicolonButton);
+        Button paste = view.findViewById(R.id.pasteButton);
+        Button copy = view.findViewById(R.id.copyButton);
+        Button cut = view.findViewById(R.id.cutButton);
+        Button selectAll = view.findViewById(R.id.selectAllButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
-        backspace.setOnClickListener(v -> deleteOneCharacter());
+        backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
         shiftButton.setOnClickListener(v -> toggleShift());
         comma.setOnClickListener(v -> commitText(","));
@@ -92,6 +104,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         hyphen.setOnClickListener(v -> commitText("-"));
         colon.setOnClickListener(v -> commitText(":"));
         semicolon.setOnClickListener(v -> commitText(";"));
+        paste.setOnClickListener(v -> editingAction(android.R.id.paste));
+        copy.setOnClickListener(v -> editingAction(android.R.id.copy));
+        cut.setOnClickListener(v -> editingAction(android.R.id.cut));
+        selectAll.setOnClickListener(v -> editingAction(android.R.id.selectAll));
         buildLetterRows();
         return view;
     }
@@ -238,6 +254,26 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (connection != null) connection.deleteSurroundingText(1, 0);
     }
 
+    private boolean handleBackspaceTouch(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            deleteOneCharacter();
+            keyHandler.removeCallbacks(repeatBackspace);
+            keyHandler.postDelayed(repeatBackspace, 420);
+            return true;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP
+                || event.getAction() == MotionEvent.ACTION_CANCEL) {
+            keyHandler.removeCallbacks(repeatBackspace);
+            return true;
+        }
+        return true;
+    }
+
+    private void editingAction(int actionId) {
+        InputConnection connection = getCurrentInputConnection();
+        if (connection != null) connection.performContextMenuAction(actionId);
+    }
+
     private void showStatus(String text) {
         if (status != null) status.setText(text);
     }
@@ -274,6 +310,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     @Override public void onFinishInputView(boolean finishingInput) {
+        keyHandler.removeCallbacks(repeatBackspace);
         stopVoiceInput();
         super.onFinishInputView(finishingInput);
     }
@@ -281,6 +318,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public void onDestroy() {
         continuousMode = false;
         handler.removeCallbacksAndMessages(null);
+        keyHandler.removeCallbacksAndMessages(null);
         if (recognizer != null) recognizer.destroy();
         recognizer = null;
         super.onDestroy();
