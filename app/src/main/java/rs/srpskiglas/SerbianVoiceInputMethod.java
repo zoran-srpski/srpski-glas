@@ -89,10 +89,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button space = view.findViewById(R.id.spaceButton);
         Button period = view.findViewById(R.id.periodButton);
         enterButton = view.findViewById(R.id.enterButton);
-        Button paste = view.findViewById(R.id.pasteButton);
-        Button copy = view.findViewById(R.id.copyButton);
-        Button cut = view.findViewById(R.id.cutButton);
-        Button selectAll = view.findViewById(R.id.selectAllButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
@@ -103,10 +99,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         space.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
         enterButton.setOnClickListener(v -> pressEditorAction());
-        paste.setOnClickListener(v -> editingAction(android.R.id.paste));
-        copy.setOnClickListener(v -> editingAction(android.R.id.copy));
-        cut.setOnClickListener(v -> editingAction(android.R.id.cut));
-        selectAll.setOnClickListener(v -> editingAction(android.R.id.selectAll));
         buildLetterRows();
         updateEditorAction(getCurrentInputEditorInfo());
         return view;
@@ -205,11 +197,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void commitText(String value) {
+        stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) connection.commitText(value, 1);
     }
 
     private void pressEditorAction() {
+        stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
         EditorInfo info = getCurrentInputEditorInfo();
@@ -312,6 +306,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void deleteOneCharacter() {
+        stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) connection.deleteSurroundingText(1, 0);
     }
@@ -331,9 +326,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         return true;
     }
 
-    private void editingAction(int actionId) {
-        InputConnection connection = getCurrentInputConnection();
-        if (connection != null) connection.performContextMenuAction(actionId);
+    private void stopDictationForManualInput() {
+        if (continuousMode || listening) stopVoiceInput();
     }
 
     private void showStatus(String text) {
@@ -345,6 +339,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     @Override public void onResults(Bundle results) {
+        if (!continuousMode) return;
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches == null || matches.isEmpty()) {
