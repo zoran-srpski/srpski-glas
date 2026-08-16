@@ -378,7 +378,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         converted = normalizePunctuationSpacing(converted);
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) {
-            if (!startsNewSentence(connection)) {
+            if (startsNewSentence(connection)) {
+                converted = uppercaseFirstLetter(converted);
+            } else {
                 converted = lowercaseFirstLetter(converted);
             }
             connection.commitText(converted + " ", 1);
@@ -402,6 +404,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             return c == '.' || c == '?' || c == '!' || c == '\n';
         }
         return true;
+    }
+
+    private String uppercaseFirstLetter(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (!Character.isLetter(c)) continue;
+            char upper = Character.toUpperCase(c);
+            if (upper == c) return text;
+            return text.substring(0, i) + upper + text.substring(i + 1);
+        }
+        return text;
     }
 
     private String lowercaseFirstLetter(String text) {
