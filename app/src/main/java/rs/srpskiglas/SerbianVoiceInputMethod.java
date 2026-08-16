@@ -30,6 +30,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private TextView status;
     private Button micButton;
     private Button scriptButton;
+    private Button symbolsButton;
     private Button shiftButton;
     private LinearLayout letterRows;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -38,6 +39,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean listening;
     private boolean latinScript;
     private boolean shifted;
+    private boolean symbolMode;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -50,6 +52,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     };
     private static final String[] LATIN_ROWS = {
             "qwertzuiopš", "asdfghjklčć", "yxcvbnmđž"
+    };
+    private static final String[] SYMBOL_ROWS = {
+            "1234567890", "@#€_$&-+()", "*/\\:;!?\"'", "[]{}<>=%|~^`"
     };
 
     @Override public View onCreateInputView() {
@@ -75,6 +80,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button switchButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
         scriptButton = view.findViewById(R.id.scriptButton);
+        symbolsButton = view.findViewById(R.id.symbolsButton);
         shiftButton = view.findViewById(R.id.shiftButton);
         letterRows = view.findViewById(R.id.letterRows);
         Button comma = view.findViewById(R.id.commaButton);
@@ -94,6 +100,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
+        symbolsButton.setOnClickListener(v -> toggleSymbols());
         shiftButton.setOnClickListener(v -> toggleShift());
         comma.setOnClickListener(v -> commitText(","));
         space.setOnClickListener(v -> commitText(" "));
@@ -115,7 +122,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void buildLetterRows() {
         if (letterRows == null) return;
         letterRows.removeAllViews();
-        String[] rows = latinScript ? LATIN_ROWS : CYRILLIC_ROWS;
+        String[] rows = symbolMode
+                ? SYMBOL_ROWS
+                : (latinScript ? LATIN_ROWS : CYRILLIC_ROWS);
         for (String rowText : rows) {
             LinearLayout row = new LinearLayout(this);
             row.setOrientation(LinearLayout.HORIZONTAL);
@@ -150,7 +159,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void typeLetter(String value) {
         commitText(value);
-        if (shifted) {
+        if (shifted && !symbolMode) {
             shifted = false;
             shiftButton.setText("⇧");
             buildLetterRows();
@@ -159,7 +168,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void toggleScript() {
         latinScript = !latinScript;
+        symbolMode = false;
         scriptButton.setText("Ћир/Lat");
+        symbolsButton.setText("123/#+=");
+        shiftButton.setEnabled(true);
         if (!continuousMode) micButton.setText(dictationButtonLabel());
         buildLetterRows();
         showStatus(latinScript
@@ -174,9 +186,24 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void toggleShift() {
+        if (symbolMode) return;
         shifted = !shifted;
         shiftButton.setText(shifted ? "⇧●" : "⇧");
         buildLetterRows();
+    }
+
+    private void toggleSymbols() {
+        symbolMode = !symbolMode;
+        shifted = false;
+        shiftButton.setText("⇧");
+        shiftButton.setEnabled(!symbolMode);
+        symbolsButton.setText(symbolMode
+                ? (latinScript ? "ABC" : "АБВ")
+                : "123/#+=");
+        buildLetterRows();
+        showStatus(symbolMode
+                ? "Бројеви и посебни знакови"
+                : (latinScript ? "Српска латиница" : "Српска ћирилица"));
     }
 
     private void commitText(String value) {
@@ -230,6 +257,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "sr-RS");
         intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, false);
+        }
         showStatus("Слушам…");
         listening = true;
         recognizer.startListening(intent);

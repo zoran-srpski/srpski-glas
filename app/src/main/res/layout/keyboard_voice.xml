@@ -61,6 +61,7 @@
             android:orientation="horizontal">
             <Button android:id="@+id/switchKeyboardButton" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#E1E3E2" android:minWidth="0dp" android:padding="0dp" android:text="🌐" android:textColor="#333333" android:textSize="18sp" />
             <Button android:id="@+id/scriptButton" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:backgroundTint="#D5E9E1" android:minWidth="0dp" android:padding="0dp" android:text="Ћир/Lat" android:textAllCaps="false" android:textColor="#234A3D" android:textSize="14sp" android:textStyle="bold" />
+            <Button android:id="@+id/symbolsButton" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="123/#+=" android:textAllCaps="false" android:textSize="13sp" />
             <Button android:id="@+id/shiftButton" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="⇧" android:textSize="20sp" />
             <Button android:id="@+id/backspaceButton" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="⌫" android:textSize="20sp" />
         </LinearLayout>
