@@ -27,6 +27,7 @@ public final class MainActivity extends Activity {
     private TextView step3Status;
     private TextView setupCompleteText;
     private Button microphonePermissionButton;
+    private boolean startDictationAfterPermission;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -97,12 +98,15 @@ public final class MainActivity extends Activity {
     private boolean isKeyboardSelected() {
         String selected = Settings.Secure.getString(
                 getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
-        String ownService = new ComponentName(
-                this, SerbianVoiceInputMethod.class).flattenToString();
-        return ownService.equals(selected);
+        ComponentName selectedService = selected == null
+                ? null : ComponentName.unflattenFromString(selected);
+        ComponentName ownService = new ComponentName(
+                this, SerbianVoiceInputMethod.class);
+        return ownService.equals(selectedService);
     }
 
     private void requestAudioPermission() {
+        startDictationAfterPermission = false;
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(
@@ -116,6 +120,7 @@ public final class MainActivity extends Activity {
     private void ensurePermissionAndDictate() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
+            startDictationAfterPermission = true;
             requestPermissions(
                     new String[]{Manifest.permission.RECORD_AUDIO},
                     AUDIO_PERMISSION_REQUEST);
@@ -144,6 +149,10 @@ public final class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (requestCode == AUDIO_PERMISSION_REQUEST) {
             updateSetupStatus();
+            boolean granted = results.length > 0
+                    && results[0] == PackageManager.PERMISSION_GRANTED;
+            if (granted && startDictationAfterPermission) startDictation();
+            startDictationAfterPermission = false;
         }
     }
 
