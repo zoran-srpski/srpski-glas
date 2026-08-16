@@ -20,7 +20,10 @@ public final class SerbianTransliterator {
 
     static String repairRecognition(String text) {
         // A frequent Google STT omission observed in the baseline test.
-        return text.replaceAll("(?iu)\\bkonjukcij", "konjunkcij");
+        String repaired = text.replaceAll("(?iu)\\bkonjukcij", "konjunkcij");
+        // Google STT consistently treats the common noun "đak" as a name.
+        // Sentence capitalization is applied later, so sentence-initial "Đak" stays correct.
+        return repaired.replaceAll("(?iu)\\bđak\\b", "đak");
     }
 
     static String applySpokenPunctuation(String text) {
