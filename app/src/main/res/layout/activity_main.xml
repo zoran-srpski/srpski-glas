@@ -154,9 +154,12 @@
         <Button
             android:id="@+id/dictateButton"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
             android:layout_marginTop="10dp"
-            android:text="🎙  Започни пробно диктирање"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="🎙  Пробај диктирање"
             android:textAllCaps="false"
             android:textSize="17sp" />
 
