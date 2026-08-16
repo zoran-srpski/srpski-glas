@@ -101,12 +101,22 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         enterButton.setOnClickListener(v -> pressEditorAction());
         buildLetterRows();
         updateEditorAction(getCurrentInputEditorInfo());
+        handler.post(this::updateAutomaticShift);
         return view;
     }
 
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
         updateEditorAction(info);
+        handler.post(this::updateAutomaticShift);
+    }
+
+    @Override public void onUpdateSelection(int oldSelStart, int oldSelEnd,
+            int newSelStart, int newSelEnd, int candidatesStart,
+            int candidatesEnd) {
+        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart,
+                newSelEnd, candidatesStart, candidatesEnd);
+        handler.post(this::updateAutomaticShift);
     }
 
     private void buildLetterRows() {
@@ -149,11 +159,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void typeLetter(String value) {
         commitText(value);
-        if (shifted && !symbolMode) {
-            shifted = false;
-            shiftButton.setText("⇧");
-            buildLetterRows();
-        }
     }
 
     private void toggleScript() {
@@ -191,6 +196,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 ? (latinScript ? "ABC" : "АБВ")
                 : "123/#+=");
         buildLetterRows();
+        if (!symbolMode) handler.post(this::updateAutomaticShift);
         showStatus(symbolMode
                 ? "Бројеви и посебни знакови"
                 : (latinScript ? "Српска латиница" : "Српска ћирилица"));
@@ -204,6 +210,18 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             removeWhitespaceBeforeCursor(connection);
         }
         connection.commitText(value, 1);
+        updateAutomaticShift();
+    }
+
+    private void updateAutomaticShift() {
+        if (symbolMode || shiftButton == null) return;
+        InputConnection connection = getCurrentInputConnection();
+        if (connection == null) return;
+        boolean shouldShift = startsNewSentence(connection);
+        if (shifted == shouldShift) return;
+        shifted = shouldShift;
+        shiftButton.setText(shifted ? "⇧●" : "⇧");
+        buildLetterRows();
     }
 
     private boolean isClosingPunctuation(String value) {
@@ -244,6 +262,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
         connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
         connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+        handler.post(this::updateAutomaticShift);
     }
 
     private void updateEditorAction(EditorInfo info) {
