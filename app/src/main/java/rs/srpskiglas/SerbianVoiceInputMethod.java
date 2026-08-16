@@ -159,7 +159,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void toggleScript() {
         latinScript = !latinScript;
-        scriptButton.setText(latinScript ? "Lat" : "Ћир");
+        scriptButton.setText("Ћир/Lat");
         if (!continuousMode) micButton.setText(dictationButtonLabel());
         buildLetterRows();
         showStatus(latinScript
