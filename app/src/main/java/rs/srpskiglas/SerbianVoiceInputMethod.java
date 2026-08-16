@@ -314,9 +314,40 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 ? SerbianTransliterator.convertLatin(matches.get(0))
                 : SerbianTransliterator.convert(matches.get(0));
         InputConnection connection = getCurrentInputConnection();
-        if (connection != null) connection.commitText(converted + " ", 1);
+        if (connection != null) {
+            if (!startsNewSentence(connection)) {
+                converted = lowercaseFirstLetter(converted);
+            }
+            connection.commitText(converted + " ", 1);
+        }
         finishListening("Унето — настављам да слушам…");
         continueListening();
+    }
+
+    private boolean startsNewSentence(InputConnection connection) {
+        CharSequence before = connection.getTextBeforeCursor(120, 0);
+        if (before == null || before.length() == 0) return true;
+        for (int i = before.length() - 1; i >= 0; i--) {
+            char c = before.charAt(i);
+            if (c == ' ' || c == '\t' || c == '\r') continue;
+            return c == '.' || c == '?' || c == '!' || c == '\n';
+        }
+        return true;
+    }
+
+    private String lowercaseFirstLetter(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (!Character.isLetter(c)) continue;
+            // Preserve abbreviations such as ОК and САД.
+            if (i + 1 < text.length() && Character.isUpperCase(text.charAt(i + 1))) {
+                return text;
+            }
+            char lower = Character.toLowerCase(c);
+            if (lower == c) return text;
+            return text.substring(0, i) + lower + text.substring(i + 1);
+        }
+        return text;
     }
 
     @Override public void onError(int error) {
