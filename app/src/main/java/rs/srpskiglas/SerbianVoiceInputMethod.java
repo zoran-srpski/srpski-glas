@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -23,6 +25,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private SpeechRecognizer recognizer;
     private TextView status;
     private Button micButton;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean continuousMode;
+    private boolean listening;
 
     @Override public View onCreateInputView() {
         View view = getLayoutInflater().inflate(R.layout.keyboard_voice, null);
@@ -46,20 +51,35 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         micButton = view.findViewById(R.id.keyboardMicButton);
         Button switchButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
-        micButton.setOnClickListener(v -> startVoiceInput());
+        micButton.setOnClickListener(v -> toggleVoiceInput());
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
         backspace.setOnClickListener(v -> deleteOneCharacter());
         return view;
     }
 
+    private void toggleVoiceInput() {
+        if (continuousMode) {
+            stopVoiceInput();
+        } else {
+            continuousMode = true;
+            micButton.setText("⏹  Заустави");
+            startVoiceInput();
+        }
+    }
+
     private void startVoiceInput() {
+        if (!continuousMode || listening) return;
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
+            continuousMode = false;
+            micButton.setText("🎙  Диктирај ћирилицом");
             Toast.makeText(this, "Отвори Српски глас и дозволи микрофон.",
                     Toast.LENGTH_LONG).show();
             return;
         }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            continuousMode = false;
+            micButton.setText("🎙  Диктирај ћирилицом");
             showStatus("Препознавање говора није доступно");
             return;
         }
@@ -76,8 +96,22 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
         showStatus("Слушам…");
-        micButton.setEnabled(false);
+        listening = true;
         recognizer.startListening(intent);
+    }
+
+    private void stopVoiceInput() {
+        continuousMode = false;
+        listening = false;
+        handler.removeCallbacksAndMessages(null);
+        if (recognizer != null) recognizer.cancel();
+        if (micButton != null) micButton.setText("🎙  Диктирај ћирилицом");
+        showStatus("Заустављено — спреман");
+    }
+
+    private void continueListening() {
+        listening = false;
+        if (continuousMode) handler.postDelayed(this::startVoiceInput, 350);
     }
 
     private void deleteOneCharacter() {
@@ -91,27 +125,41 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void finishListening(String message) {
         showStatus(message);
-        if (micButton != null) micButton.setEnabled(true);
     }
 
     @Override public void onResults(Bundle results) {
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches == null || matches.isEmpty()) {
-            finishListening("Нисам разумео — покушај поново");
+            finishListening("Настави да говориш…");
+            continueListening();
             return;
         }
         String converted = SerbianTransliterator.convert(matches.get(0));
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) connection.commitText(converted + " ", 1);
-        finishListening("Унето — спреман за наставак");
+        finishListening("Унето — настављам да слушам…");
+        continueListening();
     }
 
     @Override public void onError(int error) {
-        finishListening("Покушај поново (грешка " + error + ")");
+        listening = false;
+        if (continuousMode) {
+            showStatus("Пауза — настављам да слушам…");
+            handler.postDelayed(this::startVoiceInput, 500);
+        } else {
+            finishListening("Заустављено");
+        }
+    }
+
+    @Override public void onFinishInputView(boolean finishingInput) {
+        stopVoiceInput();
+        super.onFinishInputView(finishingInput);
     }
 
     @Override public void onDestroy() {
+        continuousMode = false;
+        handler.removeCallbacksAndMessages(null);
         if (recognizer != null) recognizer.destroy();
         recognizer = null;
         super.onDestroy();
