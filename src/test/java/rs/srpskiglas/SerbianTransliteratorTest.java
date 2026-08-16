@@ -30,6 +30,10 @@ public final class SerbianTransliteratorTest {
                 "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
                 "Данас су џем и ђак на столу. Ђак је стигао.");
 
+        expect(SerbianTransliterator.convert(
+                "Da li dolaziš znak pitanja"),
+                "Да ли долазиш?");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }

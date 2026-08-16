@@ -9,7 +9,7 @@ public final class SerbianTransliterator {
     private SerbianTransliterator() {}
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
-            "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");
+            "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|pitanja|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
         if (dictatedText == null || dictatedText.trim().isEmpty()) return "";
@@ -36,7 +36,8 @@ public final class SerbianTransliterator {
             switch (command) {
                 case "zarez": replacement = ","; break;
                 case "tačka": replacement = "."; break;
-                case "upitnik": replacement = "?"; break;
+                case "upitnik":
+                case "pitanja": replacement = "?"; break;
                 case "uzvičnik": replacement = "!"; break;
                 default: replacement = "\n";
             }
