@@ -7,13 +7,14 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.speech.RecognizerIntent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public final class MainActivity extends Activity {
     private static final int SPEECH_REQUEST = 41;
@@ -26,8 +27,17 @@ public final class MainActivity extends Activity {
         resultText = findViewById(R.id.resultText);
         Button dictate = findViewById(R.id.dictateButton);
         Button copy = findViewById(R.id.copyButton);
+        Button enableKeyboard = findViewById(R.id.enableKeyboardButton);
+        Button selectKeyboard = findViewById(R.id.selectKeyboardButton);
         dictate.setOnClickListener(v -> ensurePermissionAndDictate());
         copy.setOnClickListener(v -> copyResult());
+        enableKeyboard.setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)));
+        selectKeyboard.setOnClickListener(v -> {
+            InputMethodManager manager = (InputMethodManager)
+                    getSystemService(INPUT_METHOD_SERVICE);
+            manager.showInputMethodPicker();
+        });
     }
 
     private void ensurePermissionAndDictate() {
