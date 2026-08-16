@@ -1,78 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
+    android:fillViewport="true"
     android:background="#F6F4EE">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Српски глас"
-        android:textColor="#17221E"
-        android:textSize="30sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Изговори текст на српском — добићеш ћирилицу."
-        android:textColor="#52615B"
-        android:textSize="16sp" />
-
-    <Button
-        android:id="@+id/dictateButton"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_marginTop="28dp"
-        android:text="🎙  Започни диктирање"
-        android:textAllCaps="false"
-        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Честитамо!"
+            android:textColor="#19785B"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="Инсталирали сте „Српски глас“"
+            android:textColor="#17221E"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="Урадите следећа три корака и моћи ћете да користите ову тастатуру за ручно куцање и диктирање у свим апликацијама."
+            android:textColor="#52615B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/step1Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:text="① Омогућите тастатуру"
+            android:textColor="#17221E"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="У подешавањима укључите тастатуру „Српски глас“. Android може приказати стандардно упозорење за сваку нову тастатуру."
+            android:textColor="#52615B"
+            android:textSize="14sp" />
+
         <Button
             android:id="@+id/enableKeyboardButton"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:text="1. Омогући тастатуру"
-            android:textAllCaps="false" />
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#19785B"
+            android:text="Отвори подешавања тастатуре"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/step2Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="② Изаберите „Српски глас“"
+            android:textColor="#17221E"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Поставите „Српски глас“ као тренутну тастатуру. Касније је можете мењати дугметом 🌐."
+            android:textColor="#52615B"
+            android:textSize="14sp" />
+
         <Button
             android:id="@+id/selectKeyboardButton"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="2. Изабери тастатуру"
-            android:textAllCaps="false" />
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#19785B"
+            android:text="Изабери тастатуру"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/step3Status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="③ Дозволите микрофон"
+            android:textColor="#17221E"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Ова дозвола је потребна само за диктирање. Ручно куцање ради и без ње."
+            android:textColor="#52615B"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/microphonePermissionButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#19785B"
+            android:text="Дозволи микрофон"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/setupCompleteText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#D5E9E1"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Када завршите кораке, отворите било коју апликацију и додирните поље за писање."
+            android:textColor="#234A3D"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Испробајте диктирање"
+            android:textColor="#17221E"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/dictateButton"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="10dp"
+            android:text="🎙  Започни пробно диктирање"
+            android:textAllCaps="false"
+            android:textSize="17sp" />
+
+        <EditText
+            android:id="@+id/resultText"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="12dp"
+            android:background="#FFFFFF"
+            android:gravity="top|start"
+            android:hint="Овде ће се појавити ћирилични текст…"
+            android:inputType="textMultiLine|textCapSentences"
+            android:padding="16dp"
+            android:textColor="#17221E"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/copyButton"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="20dp"
+            android:text="Копирај текст"
+            android:textAllCaps="false"
+            android:textSize="16sp" />
     </LinearLayout>
-
-    <EditText
-        android:id="@+id/resultText"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="18dp"
-        android:background="#FFFFFF"
-        android:gravity="top|start"
-        android:hint="Овде ће се појавити ћирилични текст…"
-        android:inputType="textMultiLine|textCapSentences"
-        android:padding="16dp"
-        android:textColor="#17221E"
-        android:textSize="19sp" />
-
-    <Button
-        android:id="@+id/copyButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="14dp"
-        android:text="Копирај текст"
-        android:textAllCaps="false"
-        android:textSize="17sp" />
-</LinearLayout>
+</ScrollView>
