@@ -1,0 +1,31 @@
+package rs.srpskiglas;
+
+public final class SerbianTransliteratorTest {
+    private static void expect(String actual, String expected) {
+        if (!actual.equals(expected)) {
+            throw new AssertionError("Expected: " + expected + "\nActual:   " + actual);
+        }
+    }
+
+    public static void main(String[] args) {
+        expect(SerbianTransliterator.convert(
+                "Ljubav i njiva džem i đak injekcija je primljena u ponedeljak " +
+                "on je nadživeo svog prijatelja konj je stajao pored žbunja"),
+                "Љубав и њива џем и ђак инјекција је примљена у понедељак " +
+                "он је надживео свог пријатеља коњ је стајао поред жбуња");
+
+        expect(SerbianTransliterator.convert(
+                "Njegoš je rekao znak zarez danas idemo u Niš znak tačka da li je Anđela stigla " +
+                "znak upitnik odjednom se pojavio odžak iznad kuće znak tačka konjukcija i " +
+                "injekcija su neobične reči znak tačka"),
+                "Његош је рекао, данас идемо у Ниш. Да ли је Анђела стигла? " +
+                "Одједном се појавио оџак изнад куће. Конјункција и " +
+                "инјекција су необичне речи.");
+
+        expect(SerbianTransliterator.convert(
+                "Tačka oslonca i decimalni zarez ostaju reči znak tačka"),
+                "Тачка ослонца и децимални зарез остају речи.");
+
+        System.out.println("All Serbian transliteration tests passed.");
+    }
+}
