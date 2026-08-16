@@ -63,7 +63,7 @@
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
             android:backgroundTint="#19785B"
-            android:text="Отвори подешавања тастатуре"
+            android:text="Отвори подешавања"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
