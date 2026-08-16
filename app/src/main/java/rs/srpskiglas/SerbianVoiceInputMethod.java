@@ -17,6 +17,7 @@ import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button scriptButton;
     private Button symbolsButton;
     private Button shiftButton;
+    private Button enterButton;
     private LinearLayout letterRows;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Handler keyHandler = new Handler(Looper.getMainLooper());
@@ -86,7 +88,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button comma = view.findViewById(R.id.commaButton);
         Button space = view.findViewById(R.id.spaceButton);
         Button period = view.findViewById(R.id.periodButton);
-        Button enter = view.findViewById(R.id.enterButton);
+        enterButton = view.findViewById(R.id.enterButton);
         Button paste = view.findViewById(R.id.pasteButton);
         Button copy = view.findViewById(R.id.copyButton);
         Button cut = view.findViewById(R.id.cutButton);
@@ -100,13 +102,19 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         comma.setOnClickListener(v -> commitText(","));
         space.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
-        enter.setOnClickListener(v -> pressEnter());
+        enterButton.setOnClickListener(v -> pressEditorAction());
         paste.setOnClickListener(v -> editingAction(android.R.id.paste));
         copy.setOnClickListener(v -> editingAction(android.R.id.copy));
         cut.setOnClickListener(v -> editingAction(android.R.id.cut));
         selectAll.setOnClickListener(v -> editingAction(android.R.id.selectAll));
         buildLetterRows();
+        updateEditorAction(getCurrentInputEditorInfo());
         return view;
+    }
+
+    @Override public void onStartInputView(EditorInfo info, boolean restarting) {
+        super.onStartInputView(info, restarting);
+        updateEditorAction(info);
     }
 
     private void buildLetterRows() {
@@ -201,12 +209,46 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (connection != null) connection.commitText(value, 1);
     }
 
-    private void pressEnter() {
+    private void pressEditorAction() {
         InputConnection connection = getCurrentInputConnection();
-        if (connection != null) {
-            connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-            connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+        if (connection == null) return;
+        EditorInfo info = getCurrentInputEditorInfo();
+        int action = info == null
+                ? EditorInfo.IME_ACTION_NONE
+                : (info.imeOptions & EditorInfo.IME_MASK_ACTION);
+        boolean noAction = info != null
+                && (info.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0;
+        if (!noAction && action != EditorInfo.IME_ACTION_NONE
+                && action != EditorInfo.IME_ACTION_UNSPECIFIED) {
+            connection.performEditorAction(action);
+            return;
         }
+        connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+        connection.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+    }
+
+    private void updateEditorAction(EditorInfo info) {
+        if (enterButton == null) return;
+        int action = info == null
+                ? EditorInfo.IME_ACTION_NONE
+                : (info.imeOptions & EditorInfo.IME_MASK_ACTION);
+        boolean noAction = info != null
+                && (info.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0;
+        String label;
+        if (noAction) {
+            label = "↵";
+        } else {
+            switch (action) {
+                case EditorInfo.IME_ACTION_DONE: label = "✓"; break;
+                case EditorInfo.IME_ACTION_GO: label = "ОК"; break;
+                case EditorInfo.IME_ACTION_NEXT: label = "Даље"; break;
+                case EditorInfo.IME_ACTION_PREVIOUS: label = "Назад"; break;
+                case EditorInfo.IME_ACTION_SEARCH: label = "🔍"; break;
+                case EditorInfo.IME_ACTION_SEND: label = "Пошаљи"; break;
+                default: label = "↵";
+            }
+        }
+        enterButton.setText(label);
     }
 
     private void toggleVoiceInput() {
