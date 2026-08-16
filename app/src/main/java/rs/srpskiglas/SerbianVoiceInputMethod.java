@@ -87,11 +87,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button space = view.findViewById(R.id.spaceButton);
         Button period = view.findViewById(R.id.periodButton);
         Button enter = view.findViewById(R.id.enterButton);
-        Button question = view.findViewById(R.id.questionButton);
-        Button exclamation = view.findViewById(R.id.exclamationButton);
-        Button hyphen = view.findViewById(R.id.hyphenButton);
-        Button colon = view.findViewById(R.id.colonButton);
-        Button semicolon = view.findViewById(R.id.semicolonButton);
         Button paste = view.findViewById(R.id.pasteButton);
         Button copy = view.findViewById(R.id.copyButton);
         Button cut = view.findViewById(R.id.cutButton);
@@ -106,11 +101,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         space.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
         enter.setOnClickListener(v -> pressEnter());
-        question.setOnClickListener(v -> commitText("?"));
-        exclamation.setOnClickListener(v -> commitText("!"));
-        hyphen.setOnClickListener(v -> commitText("-"));
-        colon.setOnClickListener(v -> commitText(":"));
-        semicolon.setOnClickListener(v -> commitText(";"));
         paste.setOnClickListener(v -> editingAction(android.R.id.paste));
         copy.setOnClickListener(v -> editingAction(android.R.id.copy));
         cut.setOnClickListener(v -> editingAction(android.R.id.cut));
