@@ -42,6 +42,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean listening;
     private boolean latinScript;
     private boolean shifted;
+    private boolean capsLock;
     private boolean symbolMode;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
@@ -95,6 +96,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         scriptButton.setOnClickListener(v -> toggleScript());
         symbolsButton.setOnClickListener(v -> toggleSymbols());
         shiftButton.setOnClickListener(v -> toggleShift());
+        shiftButton.setOnLongClickListener(v -> toggleCapsLock());
         comma.setOnClickListener(v -> commitText(","));
         space.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
@@ -182,15 +184,39 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void toggleShift() {
         if (symbolMode) return;
+        if (capsLock) {
+            capsLock = false;
+            shifted = false;
+            updateAutomaticShift();
+            return;
+        }
         shifted = !shifted;
-        shiftButton.setText(shifted ? "⇧●" : "⇧");
+        updateShiftButtonLabel();
         buildLetterRows();
+    }
+
+    private boolean toggleCapsLock() {
+        if (symbolMode) return true;
+        capsLock = !capsLock;
+        shifted = capsLock;
+        if (!capsLock) {
+            updateAutomaticShift();
+        } else {
+            updateShiftButtonLabel();
+            buildLetterRows();
+        }
+        return true;
+    }
+
+    private void updateShiftButtonLabel() {
+        if (shiftButton == null) return;
+        shiftButton.setText(capsLock ? "⇧⇧" : (shifted ? "⇧●" : "⇧"));
     }
 
     private void toggleSymbols() {
         symbolMode = !symbolMode;
-        shifted = false;
-        shiftButton.setText("⇧");
+        shifted = !symbolMode && capsLock;
+        updateShiftButtonLabel();
         shiftButton.setEnabled(!symbolMode);
         symbolsButton.setText(symbolMode
                 ? (latinScript ? "ABC" : "АБВ")
@@ -214,13 +240,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void updateAutomaticShift() {
-        if (symbolMode || shiftButton == null) return;
+        if (symbolMode || capsLock || shiftButton == null) return;
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
         boolean shouldShift = startsNewSentence(connection);
         if (shifted == shouldShift) return;
         shifted = shouldShift;
-        shiftButton.setText(shifted ? "⇧●" : "⇧");
+        updateShiftButtonLabel();
         buildLetterRows();
     }
 
