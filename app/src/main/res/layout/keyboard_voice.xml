@@ -13,32 +13,102 @@
         android:text="Српски глас — спреман"
         android:textColor="#52615B"
         android:textSize="15sp" />
+    <Button
+        android:id="@+id/keyboardMicButton"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="6dp"
+        android:text="🎙  Диктирај ћирилицом"
+        android:textAllCaps="false"
+        android:textSize="17sp" />
     <LinearLayout
+        android:id="@+id/letterRows"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:orientation="horizontal">
+        <Button android:id="@+id/questionButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="?" android:textSize="17sp" />
+        <Button android:id="@+id/exclamationButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="!" android:textSize="17sp" />
+        <Button android:id="@+id/hyphenButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text="-" android:textSize="17sp" />
+        <Button android:id="@+id/colonButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text=":" android:textSize="17sp" />
+        <Button android:id="@+id/semicolonButton" android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1" android:minWidth="0dp" android:padding="0dp" android:text=";" android:textSize="17sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/functionRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
         <Button
             android:id="@+id/switchKeyboardButton"
-            android:layout_width="64dp"
-            android:layout_height="58dp"
-            android:text="⌨"
-            android:textSize="22sp" />
-        <Button
-            android:id="@+id/keyboardMicButton"
-            android:layout_width="0dp"
-            android:layout_height="58dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="🎙  Диктирај ћирилицом"
-            android:textAllCaps="false"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="🌐"
             android:textSize="18sp" />
         <Button
+            android:id="@+id/scriptButton"
+            android:layout_width="58dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="Ћир"
+            android:textAllCaps="false"
+            android:textSize="14sp" />
+        <Button
+            android:id="@+id/shiftButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="⇧"
+            android:textSize="20sp" />
+        <Button
+            android:id="@+id/commaButton"
+            android:layout_width="42dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text=","
+            android:textSize="18sp" />
+        <Button
+            android:id="@+id/spaceButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="размак"
+            android:textAllCaps="false"
+            android:textSize="13sp" />
+        <Button
+            android:id="@+id/periodButton"
+            android:layout_width="42dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="."
+            android:textSize="18sp" />
+        <Button
+            android:id="@+id/enterButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
+            android:text="↵"
+            android:textSize="20sp" />
+        <Button
             android:id="@+id/backspaceButton"
-            android:layout_width="64dp"
-            android:layout_height="58dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:padding="0dp"
             android:text="⌫"
-            android:textSize="22sp" />
+            android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>
