@@ -153,14 +153,33 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                     ColorStateList.valueOf(0xFFFF9800));
             keyHandler.postDelayed(restoreSwitchKeyboardButton, 2000);
         });
-        switchKeyboardButton.setOnLongClickListener(v -> {
+        final boolean[] keyboardPickerOpened = {false};
+        final Runnable openKeyboardPicker = () -> {
+            keyboardPickerOpened[0] = true;
             keyHandler.removeCallbacks(restoreSwitchKeyboardButton);
             restoreSwitchKeyboardButton.run();
-            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            switchKeyboardButton.performHapticFeedback(
+                    HapticFeedbackConstants.LONG_PRESS);
             InputMethodManager manager =
                     getSystemService(InputMethodManager.class);
             if (manager != null) manager.showInputMethodPicker();
-            return true;
+        };
+        switchKeyboardButton.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    keyboardPickerOpened[0] = false;
+                    keyHandler.postDelayed(openKeyboardPicker, 1500);
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    keyHandler.removeCallbacks(openKeyboardPicker);
+                    if (!keyboardPickerOpened[0]) v.performClick();
+                    return true;
+                case MotionEvent.ACTION_CANCEL:
+                    keyHandler.removeCallbacks(openKeyboardPicker);
+                    return true;
+                default:
+                    return true;
+            }
         });
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
