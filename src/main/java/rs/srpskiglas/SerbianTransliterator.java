@@ -14,9 +14,13 @@ public final class SerbianTransliterator {
     private static final Set<String> COMMON_WORDS_GOOGLE_MAY_CAPITALIZE =
             new HashSet<>(Arrays.asList(
                     "a", "ali", "da", "dakle", "i", "ili", "jer", "kad", "kada",
-                    "kako", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
+                    "hajde", "kako", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
                     "pa", "po", "pre", "sad", "sada", "sa", "samo", "tada", "tako",
-                    "to", "u", "za", "zato", "zatim", "što"));
+                    "to", "u", "za", "zato", "zatim", "što",
+                    "а", "али", "да", "дакле", "и", "или", "јер", "кад", "када",
+                    "хајде", "како", "међутим", "на", "након", "не", "него", "онда", "ово",
+                    "па", "по", "пре", "сад", "сада", "са", "само", "тада", "тако",
+                    "то", "у", "за", "зато", "затим", "што"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|pitanja|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");
