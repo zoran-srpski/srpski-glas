@@ -636,11 +636,52 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onError(int error) {
         listening = false;
+        showRecognitionError(error);
         if (continuousMode) {
             finishDictationAfterPause();
         } else {
             finishListening("Заустављено");
         }
+    }
+
+    private void showRecognitionError(int error) {
+        String message;
+        switch (error) {
+            case SpeechRecognizer.ERROR_NETWORK:
+            case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                message = latinScript
+                        ? "Proveri internet vezu i pokušaj ponovo."
+                        : "Провери интернет везу и покушај поново.";
+                break;
+            case SpeechRecognizer.ERROR_SERVER:
+            case SpeechRecognizer.ERROR_SERVER_DISCONNECTED:
+            case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                message = latinScript
+                        ? "Google prepoznavanje trenutno nije dostupno. Pokušaj ponovo."
+                        : "Google препознавање тренутно није доступно. Покушај поново.";
+                break;
+            case SpeechRecognizer.ERROR_AUDIO:
+                message = latinScript
+                        ? "Mikrofon trenutno nije dostupan."
+                        : "Микрофон тренутно није доступан.";
+                break;
+            case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                message = latinScript
+                        ? "Dozvoli aplikaciji korišćenje mikrofona."
+                        : "Дозволи апликацији коришћење микрофона.";
+                break;
+            case SpeechRecognizer.ERROR_NO_MATCH:
+            case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                message = latinScript
+                        ? "Govor nije prepoznat. Pokušaj ponovo."
+                        : "Говор није препознат. Покушај поново.";
+                break;
+            default:
+                message = latinScript
+                        ? "Diktiranje nije uspelo. Pokušaj ponovo."
+                        : "Диктирање није успело. Покушај поново.";
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override public void onFinishInputView(boolean finishingInput) {
