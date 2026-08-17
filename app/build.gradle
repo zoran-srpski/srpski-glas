@@ -17,8 +17,8 @@ android {
         applicationId 'rs.srpskiglas'
         minSdk 26
         targetSdk 35
-        versionCode 35
-        versionName '0.7.8'
+        versionCode 36
+        versionName '0.7.9'
     }
 
     buildTypes {
