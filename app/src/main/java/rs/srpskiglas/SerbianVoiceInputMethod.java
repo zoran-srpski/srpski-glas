@@ -461,6 +461,14 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
     }
 
+    private void finishDictationAfterPause() {
+        continuousMode = false;
+        listening = false;
+        handler.removeCallbacksAndMessages(null);
+        if (micButton != null) micButton.setText(dictationButtonLabel());
+        showStatus("Заустављено — притисни за наставак");
+    }
+
     private void deleteOneCharacter() {
         stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
@@ -540,8 +548,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches == null || matches.isEmpty()) {
-            finishListening("Настави да говориш…");
-            continueListening();
+            finishDictationAfterPause();
             return;
         }
         String converted = latinScript
@@ -569,8 +576,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             lastSpaceAddedByDictation = true;
             lastSpaceAddedManually = false;
         }
-        finishListening("Унето — настављам да слушам…");
-        continueListening();
+        finishDictationAfterPause();
     }
 
     private boolean endsWithSentencePunctuation(String text) {
@@ -629,8 +635,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public void onError(int error) {
         listening = false;
         if (continuousMode) {
-            showStatus("Пауза — настављам да слушам…");
-            handler.postDelayed(this::startVoiceInput, 200);
+            finishDictationAfterPause();
         } else {
             finishListening("Заустављено");
         }
