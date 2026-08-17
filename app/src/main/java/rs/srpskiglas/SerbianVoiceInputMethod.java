@@ -3,6 +3,9 @@ package rs.srpskiglas;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Build;
@@ -404,6 +407,16 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void startVoiceInput() {
         if (!continuousMode || listening) return;
+        if (!isInternetAvailable()) {
+            continuousMode = false;
+            listening = false;
+            micButton.setText(dictationButtonLabel());
+            String message = latinScript
+                    ? "Nema internet veze. Uključi internet i pokušaj ponovo."
+                    : "Нема интернет везе. Укључи интернет и покушај поново.";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return;
+        }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             continuousMode = false;
@@ -445,6 +458,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         showStatus("Слушам…");
         listening = true;
         recognizer.startListening(intent);
+    }
+
+    private boolean isInternetAvailable() {
+        ConnectivityManager manager = getSystemService(ConnectivityManager.class);
+        if (manager == null) return false;
+        Network network = manager.getActiveNetwork();
+        if (network == null) return false;
+        NetworkCapabilities capabilities = manager.getNetworkCapabilities(network);
+        return capabilities != null
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
     }
 
     private void stopVoiceInput() {
