@@ -101,13 +101,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         keyboardBody = view.findViewById(R.id.keyboardBody);
         hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
-        switchButton.setOnClickListener(v -> Toast.makeText(
-                this,
-                latinScript
-                        ? "Zadržite dugme za promenu tastature."
-                        : "Задржите дугме за промену тастатуре.",
-                Toast.LENGTH_SHORT).show());
+        switchButton.setOnClickListener(v -> {
+            v.setText(latinScript ? "DRŽI" : "ДРЖИ");
+            keyHandler.postDelayed(() -> v.setText("⇄"), 1500);
+        });
         switchButton.setOnLongClickListener(v -> {
+            v.setText("⇄");
             v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             switchToNextInputMethod(false);
             return true;
