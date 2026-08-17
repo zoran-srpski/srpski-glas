@@ -6,6 +6,7 @@
     android:padding="12dp"
     android:background="#F6F4EE">
     <LinearLayout
+        android:id="@+id/topControlRow"
         android:layout_width="match_parent"
         android:layout_height="58dp"
         android:layout_marginTop="6dp"
