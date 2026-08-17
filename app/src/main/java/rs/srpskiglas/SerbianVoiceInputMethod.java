@@ -36,6 +36,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button shiftButton;
     private Button enterButton;
     private Button openKeyboardButton;
+    private Button hideKeyboardButton;
     private LinearLayout letterRows;
     private LinearLayout keyboardBody;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -94,7 +95,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         enterButton = view.findViewById(R.id.enterButton);
         openKeyboardButton = view.findViewById(R.id.openKeyboardButton);
         keyboardBody = view.findViewById(R.id.keyboardBody);
-        Button hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
+        hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
@@ -109,6 +110,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         openKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(true));
         hideKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(false));
         setKeyboardExpanded(false);
+        updateKeyboardControlLabels();
         buildLetterRows();
         updateEditorAction(getCurrentInputEditorInfo());
         handler.post(this::updateAutomaticShift);
@@ -186,6 +188,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         symbolsButton.setText("123/#+=");
         shiftButton.setEnabled(true);
         if (!continuousMode) micButton.setText(dictationButtonLabel());
+        updateKeyboardControlLabels();
         buildLetterRows();
         showStatus(latinScript
                 ? "Латиница — пиши или диктирај"
@@ -194,8 +197,21 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private String dictationButtonLabel() {
         return latinScript
-                ? "🎙  Диктирај латиницом"
+                ? "🎙  Diktiraj latinicom"
                 : "🎙  Диктирај ћирилицом";
+    }
+
+    private void updateKeyboardControlLabels() {
+        if (openKeyboardButton != null) {
+            openKeyboardButton.setText(latinScript
+                    ? "Otvori tastaturu"
+                    : "Отвори тастатуру");
+        }
+        if (hideKeyboardButton != null) {
+            hideKeyboardButton.setText(latinScript
+                    ? "Sakrij tastaturu"
+                    : "Сакриј тастатуру");
+        }
     }
 
     private void toggleShift() {
@@ -417,7 +433,11 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void showStatus(String text) {
-        if (micButton != null && continuousMode) micButton.setText(text);
+        if (micButton != null && continuousMode) {
+            micButton.setText(latinScript
+                    ? SerbianTransliterator.convertLatin(text)
+                    : text);
+        }
     }
 
     private void finishListening(String message) {
