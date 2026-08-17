@@ -1,12 +1,22 @@
 package rs.srpskiglas;
 
 import java.util.Locale;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /** Converts Google Serbian Latin dictation into Serbian Cyrillic. */
 public final class SerbianTransliterator {
     private SerbianTransliterator() {}
+
+    private static final Set<String> COMMON_WORDS_GOOGLE_MAY_CAPITALIZE =
+            new HashSet<>(Arrays.asList(
+                    "a", "ali", "da", "dakle", "i", "ili", "jer", "kad", "kada",
+                    "kako", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
+                    "pa", "po", "pre", "sad", "sada", "sa", "samo", "tada", "tako",
+                    "to", "u", "za", "zato", "zatim", "što"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|pitanja|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");
@@ -67,6 +77,38 @@ public final class SerbianTransliterator {
             }
             out.append(c);
             if (c == '.' || c == '?' || c == '!' || c == '\n') capitalize = true;
+        }
+        return out.toString();
+    }
+
+    /**
+     * Google sometimes treats a pause as a new sentence and capitalizes a common
+     * joining word even though it did not return sentence punctuation. Correct
+     * those unambiguous cases while leaving names and all-caps abbreviations alone.
+     */
+    static String normalizeUnexpectedCapitals(String text, boolean startsSentence) {
+        StringBuilder out = new StringBuilder(text);
+        boolean sentenceStart = startsSentence;
+        for (int i = 0; i < out.length();) {
+            char c = out.charAt(i);
+            if (!Character.isLetter(c)) {
+                if (c == '.' || c == '?' || c == '!' || c == '\n') sentenceStart = true;
+                i++;
+                continue;
+            }
+
+            int wordStart = i;
+            while (i < out.length() && Character.isLetter(out.charAt(i))) i++;
+            String word = out.substring(wordStart, i);
+            String lower = word.toLowerCase(Locale.ROOT);
+            boolean allCapsAbbreviation = word.length() > 1
+                    && word.equals(word.toUpperCase(Locale.ROOT));
+            if (!sentenceStart && !allCapsAbbreviation
+                    && Character.isUpperCase(word.charAt(0))
+                    && COMMON_WORDS_GOOGLE_MAY_CAPITALIZE.contains(lower)) {
+                out.setCharAt(wordStart, Character.toLowerCase(word.charAt(0)));
+            }
+            sentenceStart = false;
         }
         return out.toString();
     }
