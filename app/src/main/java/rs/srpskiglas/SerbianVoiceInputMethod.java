@@ -384,7 +384,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 && (info.imeOptions & EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0;
         String label;
         if (noAction) {
-            label = "↵";
+            label = "↲";
         } else {
             switch (action) {
                 case EditorInfo.IME_ACTION_DONE: label = "✓"; break;
@@ -393,11 +393,11 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 case EditorInfo.IME_ACTION_PREVIOUS: label = "Назад"; break;
                 case EditorInfo.IME_ACTION_SEARCH: label = "🔍"; break;
                 case EditorInfo.IME_ACTION_SEND: label = "Пошаљи"; break;
-                default: label = "↵";
+                default: label = "↲";
             }
         }
         enterButton.setText(label);
-        enterButton.setTextSize("↵".equals(label) ? 48 : 14);
+        enterButton.setTextSize("↲".equals(label) ? 48 : 14);
     }
 
     private void toggleVoiceInput() {
