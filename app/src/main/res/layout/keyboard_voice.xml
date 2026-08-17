@@ -96,10 +96,10 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="4dp"
-            android:backgroundTint="#D5E9E1"
+            android:backgroundTint="#FFF3B0"
             android:text="Сакриј тастатуру"
             android:textAllCaps="false"
-            android:textColor="#234A3D"
+            android:textColor="#5A4600"
             android:textSize="15sp"
             android:textStyle="bold" />
     </LinearLayout>
