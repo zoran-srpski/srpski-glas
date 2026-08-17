@@ -3,6 +3,7 @@ package rs.srpskiglas;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -39,6 +40,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             Pattern.compile("[ \\t\\u00a0]+([.,!?:;%\\)\\]\\}])");
     private SpeechRecognizer recognizer;
     private Button micButton;
+    private Button switchKeyboardButton;
     private Button scriptButton;
     private Button symbolsButton;
     private Button emojiButton;
@@ -67,6 +69,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean speechStarted;
     private int startSilenceRetries;
     private long suppressKeyboardAutoOpenUntil;
+    private final Runnable restoreSwitchKeyboardButton = () -> {
+        if (switchKeyboardButton == null) return;
+        switchKeyboardButton.setText("⇄");
+        switchKeyboardButton.setBackgroundTintList(
+                ColorStateList.valueOf(0xFFE1E3E2));
+    };
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -123,7 +131,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         view.requestApplyInsets();
         micButton = view.findViewById(R.id.keyboardMicButton);
         topControlRow = view.findViewById(R.id.topControlRow);
-        Button switchButton = view.findViewById(R.id.switchKeyboardButton);
+        switchKeyboardButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
         scriptButton = view.findViewById(R.id.scriptButton);
         symbolsButton = view.findViewById(R.id.symbolsButton);
@@ -138,12 +146,16 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         keyboardBody = view.findViewById(R.id.keyboardBody);
         hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
-        switchButton.setOnClickListener(v -> {
-            switchButton.setText(latinScript ? "DRŽI" : "ДРЖИ");
-            keyHandler.postDelayed(() -> switchButton.setText("⇄"), 1500);
+        switchKeyboardButton.setOnClickListener(v -> {
+            keyHandler.removeCallbacks(restoreSwitchKeyboardButton);
+            switchKeyboardButton.setText(latinScript ? "DRŽI" : "ДРЖИ");
+            switchKeyboardButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFFFF9800));
+            keyHandler.postDelayed(restoreSwitchKeyboardButton, 2000);
         });
-        switchButton.setOnLongClickListener(v -> {
-            switchButton.setText("⇄");
+        switchKeyboardButton.setOnLongClickListener(v -> {
+            keyHandler.removeCallbacks(restoreSwitchKeyboardButton);
+            restoreSwitchKeyboardButton.run();
             v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             InputMethodManager manager =
                     getSystemService(InputMethodManager.class);
