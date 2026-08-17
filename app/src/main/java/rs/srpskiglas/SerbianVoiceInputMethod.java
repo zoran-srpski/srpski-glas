@@ -52,6 +52,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean symbolMode;
     private boolean lastSpaceAddedByDictation;
     private boolean lastSpaceAddedManually;
+    private boolean dictationContextKnown;
+    private boolean dictationNextStartsSentence;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -394,6 +396,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             stopVoiceInput();
         } else {
             continuousMode = true;
+            dictationContextKnown = false;
             micButton.setText(stopDictationButtonLabel());
             startVoiceInput();
         }
@@ -429,10 +432,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
         intent.putExtra(
                 RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
-                2000L);
+                5000L);
         intent.putExtra(
                 RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
-                1500L);
+                5000L);
+        intent.putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
+                5000L);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, false);
         }
@@ -548,17 +554,33 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                     && lastSpaceAddedByDictation) {
                 removeWhitespaceBeforeCursor(connection);
             }
-            if (startsNewSentence(connection)) {
+            boolean shouldStartSentence = dictationContextKnown
+                    ? dictationNextStartsSentence
+                    : startsNewSentence(connection);
+            if (shouldStartSentence) {
                 converted = uppercaseFirstLetter(converted);
             } else {
                 converted = lowercaseFirstLetter(converted);
             }
             connection.commitText(converted + " ", 1);
+            dictationNextStartsSentence =
+                    endsWithSentencePunctuation(converted);
+            dictationContextKnown = true;
             lastSpaceAddedByDictation = true;
             lastSpaceAddedManually = false;
         }
         finishListening("Унето — настављам да слушам…");
         continueListening();
+    }
+
+    private boolean endsWithSentencePunctuation(String text) {
+        if (text == null) return false;
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (Character.isWhitespace(c)) continue;
+            return c == '.' || c == '?' || c == '!';
+        }
+        return false;
     }
 
     private String normalizePunctuationSpacing(String text) {
