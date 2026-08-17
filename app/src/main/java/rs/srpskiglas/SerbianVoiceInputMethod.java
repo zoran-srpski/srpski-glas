@@ -127,7 +127,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         enterButton.setOnClickListener(v -> pressEditorAction());
         openKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(true));
         hideKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(false));
-        setKeyboardExpanded(false);
+        setKeyboardExpanded(true);
         updateKeyboardControlLabels();
         buildLetterRows();
         updateEditorAction(getCurrentInputEditorInfo());
@@ -139,7 +139,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         super.onStartInputView(info, restarting);
         updateEditorAction(info);
         if (!restarting) {
-            setKeyboardExpanded(false);
+            setKeyboardExpanded(true);
             lastSpaceAddedByDictation = false;
             lastSpaceAddedManually = false;
         }
