@@ -569,6 +569,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             } else {
                 converted = lowercaseFirstLetter(converted);
             }
+            converted = SerbianTransliterator.normalizeUnexpectedCapitals(
+                    converted, shouldStartSentence);
             connection.commitText(converted + " ", 1);
             dictationNextStartsSentence =
                     endsWithSentencePunctuation(converted);
