@@ -35,7 +35,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button symbolsButton;
     private Button shiftButton;
     private Button enterButton;
+    private Button openKeyboardButton;
     private LinearLayout letterRows;
+    private LinearLayout keyboardBody;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Handler keyHandler = new Handler(Looper.getMainLooper());
     private boolean continuousMode;
@@ -90,6 +92,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button space = view.findViewById(R.id.spaceButton);
         Button period = view.findViewById(R.id.periodButton);
         enterButton = view.findViewById(R.id.enterButton);
+        openKeyboardButton = view.findViewById(R.id.openKeyboardButton);
+        keyboardBody = view.findViewById(R.id.keyboardBody);
+        Button hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
         switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
@@ -101,6 +106,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         space.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
         enterButton.setOnClickListener(v -> pressEditorAction());
+        openKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(true));
+        hideKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(false));
+        setKeyboardExpanded(false);
         buildLetterRows();
         updateEditorAction(getCurrentInputEditorInfo());
         handler.post(this::updateAutomaticShift);
@@ -110,6 +118,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
         updateEditorAction(info);
+        if (!restarting) setKeyboardExpanded(false);
         handler.post(this::updateAutomaticShift);
     }
 
@@ -119,6 +128,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart,
                 newSelEnd, candidatesStart, candidatesEnd);
         handler.post(this::updateAutomaticShift);
+    }
+
+    private void setKeyboardExpanded(boolean expanded) {
+        if (openKeyboardButton == null || keyboardBody == null) return;
+        openKeyboardButton.setVisibility(expanded ? View.GONE : View.VISIBLE);
+        keyboardBody.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        keyboardBody.requestLayout();
     }
 
     private void buildLetterRows() {
