@@ -187,7 +187,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         scriptButton.setText("Ћир/Lat");
         symbolsButton.setText("123/#+=");
         shiftButton.setEnabled(true);
-        if (!continuousMode) micButton.setText(dictationButtonLabel());
+        micButton.setText(continuousMode
+                ? stopDictationButtonLabel()
+                : dictationButtonLabel());
         updateKeyboardControlLabels();
         buildLetterRows();
         showStatus(latinScript
@@ -199,6 +201,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         return latinScript
                 ? "🎙  Diktiraj latinicom"
                 : "🎙  Диктирај ћирилицом";
+    }
+
+    private String stopDictationButtonLabel() {
+        return latinScript
+                ? "⏹  Zaustavi diktiranje"
+                : "⏹  Заустави диктирање";
     }
 
     private void updateKeyboardControlLabels() {
@@ -352,7 +360,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             stopVoiceInput();
         } else {
             continuousMode = true;
-            micButton.setText("⏹  Заустави");
+            micButton.setText(stopDictationButtonLabel());
             startVoiceInput();
         }
     }
@@ -416,7 +424,15 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void deleteOneCharacter() {
         stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
-        if (connection != null) connection.deleteSurroundingText(1, 0);
+        if (connection == null) return;
+        CharSequence selected = connection.getSelectedText(0);
+        if (selected != null && selected.length() > 0) {
+            connection.commitText("", 1);
+            updateAutomaticShift();
+            return;
+        }
+        connection.deleteSurroundingText(1, 0);
+        updateAutomaticShift();
     }
 
     private boolean handleBackspaceTouch(MotionEvent event) {
@@ -440,7 +456,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void showStatus(String text) {
         if (micButton != null && continuousMode) {
-            micButton.setText(latinScript ? uiTextLatin(text) : text);
+            micButton.setText(stopDictationButtonLabel());
         }
     }
 
