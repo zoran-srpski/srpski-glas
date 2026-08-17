@@ -215,7 +215,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 if (shifted) key = key.toUpperCase(new java.util.Locale("sr"));
                 Button keyButton = new Button(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        0, dp(42), 1f);
+                        0, dp(40), 1f);
                 params.setMargins(dp(1), dp(1), dp(1), dp(1));
                 keyButton.setLayoutParams(params);
                 keyButton.setMinWidth(0);
@@ -228,7 +228,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 row.addView(keyButton);
             }
             letterRows.addView(row, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dp(44)));
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(42)));
         }
     }
 
@@ -861,13 +861,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             micButton.setSingleLine(true);
             micButton.setMaxLines(1);
             ViewGroup.LayoutParams buttonParams = micButton.getLayoutParams();
-            buttonParams.height = dp(54);
+            buttonParams.height = dp(50);
             micButton.setLayoutParams(buttonParams);
         }
         if (scriptButton != null) scriptButton.setVisibility(View.VISIBLE);
         if (topControlRow != null) {
             ViewGroup.LayoutParams rowParams = topControlRow.getLayoutParams();
-            rowParams.height = dp(54);
+            rowParams.height = dp(50);
             topControlRow.setLayoutParams(rowParams);
         }
     }
