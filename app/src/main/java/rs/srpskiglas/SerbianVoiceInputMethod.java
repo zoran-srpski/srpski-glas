@@ -37,6 +37,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button enterButton;
     private Button openKeyboardButton;
     private Button hideKeyboardButton;
+    private Button spaceButton;
     private LinearLayout letterRows;
     private LinearLayout keyboardBody;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -92,7 +93,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         shiftButton = view.findViewById(R.id.shiftButton);
         letterRows = view.findViewById(R.id.letterRows);
         Button comma = view.findViewById(R.id.commaButton);
-        Button space = view.findViewById(R.id.spaceButton);
+        spaceButton = view.findViewById(R.id.spaceButton);
         Button period = view.findViewById(R.id.periodButton);
         enterButton = view.findViewById(R.id.enterButton);
         openKeyboardButton = view.findViewById(R.id.openKeyboardButton);
@@ -106,7 +107,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         shiftButton.setOnClickListener(v -> toggleShift());
         shiftButton.setOnLongClickListener(v -> toggleCapsLock());
         comma.setOnClickListener(v -> commitText(","));
-        space.setOnClickListener(v -> commitText(" "));
+        spaceButton.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));
         enterButton.setOnClickListener(v -> pressEditorAction());
         openKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(true));
@@ -225,6 +226,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             hideKeyboardButton.setText(latinScript
                     ? "Sakrij tastaturu"
                     : "Сакриј тастатуру");
+        }
+        if (spaceButton != null) {
+            spaceButton.setText(latinScript ? "RAZMAK" : "РАЗМАК");
         }
     }
 
