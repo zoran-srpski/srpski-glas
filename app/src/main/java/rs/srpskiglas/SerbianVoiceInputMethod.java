@@ -47,6 +47,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean shifted;
     private boolean capsLock;
     private boolean symbolMode;
+    private boolean lastSpaceAddedByDictation;
+    private boolean lastSpaceAddedManually;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -120,7 +122,11 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
         updateEditorAction(info);
-        if (!restarting) setKeyboardExpanded(false);
+        if (!restarting) {
+            setKeyboardExpanded(false);
+            lastSpaceAddedByDictation = false;
+            lastSpaceAddedManually = false;
+        }
         handler.post(this::updateAutomaticShift);
     }
 
@@ -272,10 +278,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
-        if (isClosingPunctuation(value)) {
+        if (isClosingPunctuation(value) && !lastSpaceAddedManually) {
             removeWhitespaceBeforeCursor(connection);
         }
         connection.commitText(value, 1);
+        lastSpaceAddedByDictation = false;
+        lastSpaceAddedManually = " ".equals(value);
         updateAutomaticShift();
     }
 
@@ -298,6 +306,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 || "]".equals(value) || "}".equals(value);
     }
 
+    private boolean startsWithClosingPunctuation(String value) {
+        if (value == null || value.isEmpty()) return false;
+        int codePoint = value.codePointAt(0);
+        return isClosingPunctuation(
+                new String(Character.toChars(codePoint)));
+    }
+
     private void removeWhitespaceBeforeCursor(
             InputConnection connection) {
         CharSequence before = connection.getTextBeforeCursor(32, 0);
@@ -313,6 +328,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void pressEditorAction() {
         stopDictationForManualInput();
+        lastSpaceAddedByDictation = false;
+        lastSpaceAddedManually = false;
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
         EditorInfo info = getCurrentInputEditorInfo();
@@ -428,10 +445,14 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         CharSequence selected = connection.getSelectedText(0);
         if (selected != null && selected.length() > 0) {
             connection.commitText("", 1);
+            lastSpaceAddedByDictation = false;
+            lastSpaceAddedManually = false;
             updateAutomaticShift();
             return;
         }
         connection.deleteSurroundingText(1, 0);
+        lastSpaceAddedByDictation = false;
+        lastSpaceAddedManually = false;
         updateAutomaticShift();
     }
 
@@ -506,12 +527,18 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         converted = normalizePunctuationSpacing(converted);
         InputConnection connection = getCurrentInputConnection();
         if (connection != null) {
+            if (startsWithClosingPunctuation(converted)
+                    && lastSpaceAddedByDictation) {
+                removeWhitespaceBeforeCursor(connection);
+            }
             if (startsNewSentence(connection)) {
                 converted = uppercaseFirstLetter(converted);
             } else {
                 converted = lowercaseFirstLetter(converted);
             }
             connection.commitText(converted + " ", 1);
+            lastSpaceAddedByDictation = true;
+            lastSpaceAddedManually = false;
         }
         finishListening("Унето — настављам да слушам…");
         continueListening();
