@@ -101,6 +101,8 @@
             android:backgroundTint="#FFF3B0"
             android:text="Сакриј тастатуру"
             android:textAllCaps="false"
+            android:includeFontPadding="false"
+            android:translationY="-2dp"
             android:textColor="#5A4600"
             android:textSize="15sp"
             android:textStyle="bold" />
