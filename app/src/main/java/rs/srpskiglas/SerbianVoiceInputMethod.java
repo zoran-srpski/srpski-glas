@@ -168,7 +168,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     keyboardPickerOpened[0] = false;
-                    keyHandler.postDelayed(openKeyboardPicker, 1500);
+                    keyHandler.postDelayed(openKeyboardPicker, 1000);
                     return true;
                 case MotionEvent.ACTION_UP:
                     keyHandler.removeCallbacks(openKeyboardPicker);
