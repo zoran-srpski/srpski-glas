@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button spaceButton;
     private LinearLayout letterRows;
     private LinearLayout keyboardBody;
+    private LinearLayout topControlRow;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Handler keyHandler = new Handler(Looper.getMainLooper());
     private boolean continuousMode;
@@ -95,6 +97,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         });
         view.requestApplyInsets();
         micButton = view.findViewById(R.id.keyboardMicButton);
+        topControlRow = view.findViewById(R.id.topControlRow);
         Button switchButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
         scriptButton = view.findViewById(R.id.scriptButton);
@@ -397,6 +400,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void toggleVoiceInput() {
+        restoreMicButtonLayout();
         if (continuousMode) {
             stopVoiceInput();
         } else {
@@ -414,6 +418,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (!isInternetAvailable()) {
             continuousMode = false;
             listening = false;
+            setKeepScreenOnWhileDictating(false);
             micButton.setText(dictationButtonLabel());
             String message = latinScript
                     ? "Nema internet veze. Uključi internet i pokušaj ponovo."
@@ -424,6 +429,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             continuousMode = false;
+            setKeepScreenOnWhileDictating(false);
             micButton.setText(dictationButtonLabel());
             Toast.makeText(this, "Отвори Српски глас и дозволи микрофон.",
                     Toast.LENGTH_LONG).show();
@@ -431,6 +437,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             continuousMode = false;
+            setKeepScreenOnWhileDictating(false);
             micButton.setText(dictationButtonLabel());
             showStatus("Препознавање говора није доступно");
             return;
@@ -462,6 +469,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         showStatus("Слушам…");
         speechStarted = false;
         listening = true;
+        setKeepScreenOnWhileDictating(true);
         recognizer.startListening(intent);
     }
 
@@ -479,6 +487,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void stopVoiceInput() {
         continuousMode = false;
         listening = false;
+        setKeepScreenOnWhileDictating(false);
         handler.removeCallbacksAndMessages(null);
         if (recognizer != null) recognizer.cancel();
         if (micButton != null) micButton.setText(dictationButtonLabel());
@@ -493,6 +502,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void finishDictationAfterPause() {
         continuousMode = false;
         listening = false;
+        setKeepScreenOnWhileDictating(false);
         handler.removeCallbacksAndMessages(null);
         if (micButton != null) micButton.setText(dictationButtonLabel());
         showStatus("Заустављено — притисни за наставак");
@@ -722,13 +732,47 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void showTemporaryMicMessage(String message) {
-        if (micButton != null) micButton.setText(message);
+        if (micButton != null) {
+            micButton.setText(message);
+            micButton.setSingleLine(false);
+            micButton.setMaxLines(2);
+            ViewGroup.LayoutParams buttonParams = micButton.getLayoutParams();
+            buttonParams.height = dp(84);
+            micButton.setLayoutParams(buttonParams);
+        }
+        if (scriptButton != null) scriptButton.setVisibility(View.GONE);
+        if (topControlRow != null) {
+            ViewGroup.LayoutParams rowParams = topControlRow.getLayoutParams();
+            rowParams.height = dp(84);
+            topControlRow.setLayoutParams(rowParams);
+        }
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         handler.postDelayed(() -> {
+            restoreMicButtonLayout();
             if (micButton != null && !continuousMode && !listening) {
                 micButton.setText(dictationButtonLabel());
             }
         }, 4500);
+    }
+
+    private void restoreMicButtonLayout() {
+        if (micButton != null) {
+            micButton.setSingleLine(true);
+            micButton.setMaxLines(1);
+            ViewGroup.LayoutParams buttonParams = micButton.getLayoutParams();
+            buttonParams.height = dp(58);
+            micButton.setLayoutParams(buttonParams);
+        }
+        if (scriptButton != null) scriptButton.setVisibility(View.VISIBLE);
+        if (topControlRow != null) {
+            ViewGroup.LayoutParams rowParams = topControlRow.getLayoutParams();
+            rowParams.height = dp(58);
+            topControlRow.setLayoutParams(rowParams);
+        }
+    }
+
+    private void setKeepScreenOnWhileDictating(boolean keepOn) {
+        if (micButton != null) micButton.setKeepScreenOn(keepOn);
     }
 
     @Override public void onFinishInputView(boolean finishingInput) {
