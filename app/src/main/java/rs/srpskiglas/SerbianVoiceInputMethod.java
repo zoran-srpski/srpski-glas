@@ -25,6 +25,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button micButton;
     private Button scriptButton;
     private Button symbolsButton;
+    private Button emojiButton;
     private Button shiftButton;
     private Button enterButton;
     private Button openKeyboardButton;
@@ -55,6 +57,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean shifted;
     private boolean capsLock;
     private boolean symbolMode;
+    private boolean emojiMode;
+    private int emojiCategory;
     private boolean lastSpaceAddedByDictation;
     private boolean lastSpaceAddedManually;
     private boolean dictationContextKnown;
@@ -77,6 +81,25 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private static final String[] SYMBOL_ROWS = {
             "1234567890", "@#€_$&-+()", "*/\\:;!?\"'", "[]{}<>=%|~^`"
     };
+    private static final String[] EMOJI_CATEGORY_LABELS = {
+            "★", "😀", "🧑", "🐻", "🍔", "⚽", "🚗", "💡", "❤️", "🚩"
+    };
+    private static final String[][] EMOJI_CATEGORIES = {
+            emoji("😀 😂 🤣 😊 😍 🥰 😘 😉 😎 🤗 🤔 😢 😭 😡 👍 👎 👏 🙏 💪 ❤️ 💔 🔥 🎉 ✅ ❌ ⭐ 💯"),
+            emoji("😀 😃 😄 😁 😆 😅 😂 🤣 🥲 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😝 😜 🤪 🤨 🧐 🤓 😎 🥸 🤩 🥳 😏 😒 😞 😔 😟 😕 🙁 ☹️ 😣 😖 😫 😩 🥺 😢 😭 😤 😠 😡 🤬 🤯 😳 🥵 🥶 😱 😨 😰 😥 😓 🤗 🤔 🫣 🤭 🫢 🫡 🤫 🫠 🤥 😶 😐 😑 😬 🙄 😯 😦 😧 😮 😲 🥱 😴 🤤 😪 😵 🤐 🥴 🤢 🤮 🤧 😷 🤒 🤕 😈 👿 👻 💀 ☠️ 👽 🤖 💩"),
+            emoji("👋 🤚 🖐️ ✋ 🖖 🫱 🫲 🫳 🫴 👌 🤌 🤏 ✌️ 🤞 🫰 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ 🫵 👍 👎 ✊ 👊 🤛 🤜 👏 🙌 🫶 👐 🤲 🤝 🙏 ✍️ 💅 🤳 💪 🦾 🦵 🦶 👂 👃 👀 👁️ 🧠 🫀 🫁 🦷 🦴 👶 🧒 👦 👧 🧑 👱 👨 🧔 👩 🧓 👴 👵 🙍 🙎 🙅 🙆 💁 🙋 🧏 🙇 🤦 🤷 👮 👷 💂 🕵️ 👩‍⚕️ 👩‍🌾 👩‍🍳 👩‍🎓 👩‍🎤 👩‍🏫 👩‍💻 👩‍💼 👩‍🔧 👩‍🔬 👩‍🎨 👩‍🚒 👩‍✈️ 👩‍🚀 👩‍⚖️ 🤴 👸 🥷 🦸 🦹 🧙 🧚 🧛 🧜 🧝 🧞 🧟 💆 💇 🚶 🧍 🧎 🏃 💃 🕺 👯 🧖 🧗 🤺 🏇 ⛷️ 🏂 🏌️ 🏄 🚣 🏊 ⛹️ 🏋️ 🚴 🤸 🤼 🤽 🤾 🤹 🧘 🛀 🛌"),
+            emoji("🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐻‍❄️ 🐨 🐯 🦁 🐮 🐷 🐽 🐸 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🐣 🐥 🦆 🦅 🦉 🦇 🐺 🐗 🐴 🦄 🐝 🪱 🐛 🦋 🐌 🪲 🐞 🦗 🪳 🕷️ 🦂 🐢 🐍 🦎 🐙 🦑 🦐 🦞 🦀 🐡 🐠 🐟 🐬 🐳 🐋 🦈 🐊 🐅 🐆 🦓 🦍 🦧 🐘 🦛 🦏 🐪 🐫 🦒 🦘 🦬 🐃 🐂 🐄 🐎 🐖 🐏 🐑 🦙 🐐 🦌 🐕 🐩 🦮 🐕‍🦺 🐈 🐈‍⬛ 🪶 🐓 🦃 🦤 🦚 🦜 🦢 🦩 🕊️ 🐇 🦝 🦨 🦡 🦫 🦦 🦥 🐁 🐀 🐿️ 🦔 🌵 🎄 🌲 🌳 🌴 🪵 🌱 🌿 ☘️ 🍀 🎍 🪴 🎋 🍃 🍂 🍁 🍄 🐚 🪨 🌾 💐 🌷 🌹 🥀 🌺 🌸 🌼 🌻 🌞 🌝 🌚 🌍 🌎 🌏 ⭐ 🌟 ✨ ⚡ ☄️ 🔥 🌈 ☀️ 🌤️ ⛅ 🌧️ ⛈️ ❄️ ☃️ 💨 💧 🌊"),
+            emoji("🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍈 🍒 🍑 🥭 🍍 🥥 🥝 🍅 🍆 🥑 🥦 🥬 🥒 🌶️ 🫑 🌽 🥕 🫒 🧄 🧅 🥔 🍠 🫘 🥐 🥯 🍞 🥖 🥨 🧀 🥚 🍳 🧈 🥞 🧇 🥓 🥩 🍗 🍖 🌭 🍔 🍟 🍕 🫓 🥪 🥙 🧆 🌮 🌯 🫔 🥗 🥘 🫕 🥫 🍝 🍜 🍲 🍛 🍣 🍱 🥟 🦪 🍤 🍙 🍚 🍘 🍥 🥠 🥮 🍢 🍡 🍧 🍨 🍦 🥧 🧁 🍰 🎂 🍮 🍭 🍬 🍫 🍿 🍩 🍪 🌰 🥜 🍯 🥛 ☕ 🫖 🍵 🧃 🥤 🧋 🍺 🍻 🥂 🍷 🥃 🍸 🍹 🧉 🍾 🧊 🥄 🍴 🍽️"),
+            emoji("⚽ 🏀 🏈 ⚾ 🥎 🎾 🏐 🏉 🥏 🎱 🪀 🏓 🏸 🏒 🏑 🥍 🏏 🪃 🥅 ⛳ 🪁 🛝 🏹 🎣 🤿 🥊 🥋 🎽 🛹 🛼 🛷 ⛸️ 🥌 🎿 ⛷️ 🏂 🪂 🏋️ 🤼 🤸 ⛹️ 🤺 🤾 🏌️ 🏇 🧘 🏄 🏊 🤽 🚣 🧗 🚵 🚴 🏆 🥇 🥈 🥉 🏅 🎖️ 🏵️ 🎗️ 🎫 🎟️ 🎪 🤹 🎭 🩰 🎨 🎬 🎤 🎧 🎼 🎹 🥁 🪘 🎷 🎺 🪗 🎸 🪕 🎻 🎲 ♟️ 🎯 🎳 🎮 🎰 🧩"),
+            emoji("🚗 🚕 🚙 🚌 🚎 🏎️ 🚓 🚑 🚒 🚐 🛻 🚚 🚛 🚜 🦯 🦽 🦼 🛴 🚲 🛵 🏍️ 🛺 🚨 🚔 🚍 🚘 🚖 🚡 🚠 🚟 🚃 🚋 🚞 🚝 🚄 🚅 🚈 🚂 🚆 🚇 🚊 🚉 ✈️ 🛫 🛬 🛩️ 💺 🛰️ 🚀 🛸 🚁 🛶 ⛵ 🚤 🛥️ 🛳️ ⛴️ 🚢 ⚓ 🛟 ⛽ 🚧 🚦 🚥 🗺️ 🗿 🗽 🗼 🏰 🏯 🏟️ 🎡 🎢 🎠 ⛲ ⛱️ 🏖️ 🏝️ 🏜️ 🌋 ⛰️ 🏕️ ⛺ 🛖 🏠 🏡 🏢 🏥 🏦 🏨 🏪 🏫 ⛪ 🕌 🕍 ⛩️ 🕋 ⛲ 🌁 🌃 🏙️ 🌄 🌅 🌆 🌇 🌉 ♨️ 🎑 🏞️"),
+            emoji("⌚ 📱 💻 ⌨️ 🖥️ 🖨️ 🖱️ 🖲️ 🕹️ 🗜️ 💽 💾 💿 📀 📼 📷 📸 📹 🎥 📽️ 🎞️ 📞 ☎️ 📟 📠 📺 📻 🎙️ 🎚️ 🎛️ 🧭 ⏱️ ⏲️ ⏰ 🕰️ ⌛ ⏳ 📡 🔋 🪫 🔌 💡 🔦 🕯️ 🧯 🛢️ 💸 💵 💴 💶 💷 🪙 💰 💳 💎 ⚖️ 🪜 🧰 🪛 🔧 🔨 ⚒️ 🛠️ ⛏️ 🪚 🔩 ⚙️ 🪤 🧱 ⛓️ 🧲 🔫 💣 🧨 🪓 🔪 🗡️ ⚔️ 🛡️ 🚬 ⚰️ 🪦 ⚱️ 🏺 🔮 📿 🧿 💈 ⚗️ 🔭 🔬 🕳️ 🩹 🩺 💊 💉 🩸 🧬 🦠 🧫 🧪 🌡️ 🧹 🪠 🧺 🧻 🚽 🚿 🛁 🧼 🪥 🪒 🧽 🪣 🧴 🔑 🗝️ 🚪 🪑 🛋️ 🛏️ 🧸 🪆 🖼️ 🪞 🪟 🛍️ 🛒 🎁 🎈 🎏 🎀 🪄 🪅 🎊 🎉 🧧 ✉️ 📩 📨 📧 💌 📥 📤 📦 🏷️ 📪 📫 📬 📭 📮 📯 📜 📃 📄 📑 🧾 📊 📈 📉 🗒️ 🗓️ 📆 📅 🗑️ 📇 🗃️ 🗳️ 🗄️ 📋 📁 📂 🗂️ 🗞️ 📰 📓 📔 📒 📕 📗 📘 📙 📚 📖 🔖 🧷 🔗 📎 🖇️ 📐 📏 🧮 📌 📍 ✂️ 🖊️ 🖋️ ✒️ 🖌️ 🖍️ 📝 ✏️ 🔍 🔎 🔒 🔓"),
+            emoji("❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️ ✝️ ☪️ 🕉️ ☸️ ✡️ 🔯 🕎 ☯️ ☦️ 🛐 ⛎ ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏ ♐ ♑ ♒ ♓ 🆔 ⚛️ ☢️ ☣️ 📴 📳 🈶 🈚 🈸 🈺 🈷️ ✴️ 🆚 💮 🉐 ㊙️ ㊗️ 🈴 🈵 🈹 🈲 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 ❌ ⭕ 🛑 ⛔ 📛 🚫 💯 💢 ♨️ 🚷 🚯 🚳 🚱 🔞 📵 🚭 ❗ ❕ ❓ ❔ ‼️ ⁉️ 🔅 🔆 〽️ ⚠️ 🚸 🔱 ⚜️ 🔰 ♻️ ✅ 🈯 💹 ❇️ ✳️ ❎ 🌐 💠 Ⓜ️ 🌀 💤 🏧 🚾 ♿ 🅿️ 🛗 🈳 🈂️ 🛂 🛃 🛄 🛅 🚹 🚺 🚼 ⚧️ 🚻 🚮 🎦 📶 🈁 🔣 ℹ️ 🔤 🔡 🔠 🆖 🆗 🆙 🆒 🆕 🆓 0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 🔢 ▶️ ⏸️ ⏯️ ⏹️ ⏺️ ⏭️ ⏮️ ⏩ ⏪ 🔀 🔁 🔂 ◀️ 🔼 🔽 ⏫ ⏬ ➡️ ⬅️ ⬆️ ⬇️ ↗️ ↘️ ↙️ ↖️ ↕️ ↔️ ↪️ ↩️ ⤴️ ⤵️ 🔄 🔃 🎵 🎶 ➕ ➖ ➗ ✖️ 🟰 ♾️ 💲 ™️ ©️ ®️ 〰️ ➰ ➿ ✔️ ☑️ 🔘 ⚪ ⚫ 🔴 🔵 🟤 🟣 🟠 🟡 🟢 ◼️ ◻️ 🔸 🔹 🔶 🔷 🔺 🔻"),
+            emoji("🏳️ 🏴 🏁 🚩 🏳️‍🌈 🏳️‍⚧️ 🇷🇸 🇲🇪 🇧🇦 🇭🇷 🇸🇮 🇲🇰 🇦🇱 🇽🇰 🇬🇷 🇧🇬 🇷🇴 🇭🇺 🇦🇹 🇩🇪 🇨🇭 🇮🇹 🇫🇷 🇪🇸 🇵🇹 🇬🇧 🇮🇪 🇳🇱 🇧🇪 🇱🇺 🇩🇰 🇳🇴 🇸🇪 🇫🇮 🇮🇸 🇵🇱 🇨🇿 🇸🇰 🇺🇦 🇷🇺 🇧🇾 🇲🇩 🇱🇹 🇱🇻 🇪🇪 🇹🇷 🇨🇾 🇬🇪 🇦🇲 🇦🇿 🇺🇸 🇨🇦 🇲🇽 🇧🇷 🇦🇷 🇨🇱 🇨🇴 🇵🇪 🇺🇾 🇨🇺 🇯🇲 🇨🇳 🇯🇵 🇰🇷 🇮🇳 🇮🇩 🇹🇭 🇻🇳 🇵🇭 🇲🇾 🇸🇬 🇦🇺 🇳🇿 🇿🇦 🇪🇬 🇲🇦 🇹🇳 🇩🇿 🇳🇬 🇰🇪 🇮🇱 🇵🇸 🇸🇦 🇦🇪 🇮🇷 🇮🇶 🇺🇳 🇪🇺")
+    };
+
+    private static String[] emoji(String values) {
+        return values.split(" ");
+    }
 
     @Override public View onCreateInputView() {
         View view = getLayoutInflater().inflate(R.layout.keyboard_voice, null);
@@ -102,6 +125,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         Button backspace = view.findViewById(R.id.backspaceButton);
         scriptButton = view.findViewById(R.id.scriptButton);
         symbolsButton = view.findViewById(R.id.symbolsButton);
+        emojiButton = view.findViewById(R.id.emojiButton);
         shiftButton = view.findViewById(R.id.shiftButton);
         letterRows = view.findViewById(R.id.letterRows);
         Button comma = view.findViewById(R.id.commaButton);
@@ -127,6 +151,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
         symbolsButton.setOnClickListener(v -> toggleSymbols());
+        emojiButton.setOnClickListener(v -> toggleEmoji());
         shiftButton.setOnClickListener(v -> toggleShift());
         shiftButton.setOnLongClickListener(v -> toggleCapsLock());
         comma.setOnClickListener(v -> commitText(","));
@@ -172,6 +197,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void buildLetterRows() {
         if (letterRows == null) return;
         letterRows.removeAllViews();
+        if (emojiMode) {
+            buildEmojiRows();
+            return;
+        }
         String[] rows = symbolMode
                 ? SYMBOL_ROWS
                 : (latinScript ? LATIN_ROWS : CYRILLIC_ROWS);
@@ -203,6 +232,59 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
     }
 
+    private void buildEmojiRows() {
+        LinearLayout categories = new LinearLayout(this);
+        categories.setOrientation(LinearLayout.HORIZONTAL);
+        categories.setGravity(Gravity.CENTER);
+        for (int i = 0; i < EMOJI_CATEGORY_LABELS.length; i++) {
+            Button category = new Button(this);
+            category.setLayoutParams(new LinearLayout.LayoutParams(0, dp(40), 1f));
+            category.setMinWidth(0);
+            category.setPadding(0, 0, 0, 0);
+            category.setAllCaps(false);
+            category.setText((i == emojiCategory ? "•" : "") + EMOJI_CATEGORY_LABELS[i]);
+            category.setTextSize(16);
+            final int selected = i;
+            category.setOnClickListener(v -> {
+                emojiCategory = selected;
+                buildLetterRows();
+            });
+            categories.addView(category);
+        }
+        letterRows.addView(categories, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(40)));
+
+        String[] values = EMOJI_CATEGORIES[emojiCategory];
+        int perRow = (values.length + 2) / 3;
+        for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
+            HorizontalScrollView scroller = new HorizontalScrollView(this);
+            scroller.setHorizontalScrollBarEnabled(false);
+            scroller.setFillViewport(true);
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            int start = rowIndex * perRow;
+            int end = Math.min(values.length, start + perRow);
+            for (int i = start; i < end; i++) {
+                Button keyButton = new Button(this);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        dp(52), dp(48));
+                params.setMargins(dp(1), dp(1), dp(1), dp(1));
+                keyButton.setLayoutParams(params);
+                keyButton.setMinWidth(0);
+                keyButton.setPadding(0, 0, 0, 0);
+                keyButton.setAllCaps(false);
+                keyButton.setText(values[i]);
+                keyButton.setTextSize(21);
+                final String value = values[i];
+                keyButton.setOnClickListener(v -> commitText(value));
+                row.addView(keyButton);
+            }
+            scroller.addView(row);
+            letterRows.addView(scroller, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(50)));
+        }
+    }
+
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
@@ -214,8 +296,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void toggleScript() {
         latinScript = !latinScript;
         symbolMode = false;
+        emojiMode = false;
         scriptButton.setText("Ћир/Lat");
         symbolsButton.setText("123/#+=");
+        emojiButton.setText("😀");
         shiftButton.setEnabled(true);
         micButton.setText(continuousMode
                 ? stopDictationButtonLabel()
@@ -256,7 +340,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void toggleShift() {
-        if (symbolMode) return;
+        if (symbolMode || emojiMode) return;
         if (capsLock) {
             capsLock = false;
             shifted = false;
@@ -269,7 +353,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private boolean toggleCapsLock() {
-        if (symbolMode) return true;
+        if (symbolMode || emojiMode) return true;
         capsLock = !capsLock;
         shifted = capsLock;
         if (!capsLock) {
@@ -288,17 +372,33 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void toggleSymbols() {
         symbolMode = !symbolMode;
+        emojiMode = false;
         shifted = !symbolMode && capsLock;
         updateShiftButtonLabel();
         shiftButton.setEnabled(!symbolMode);
         symbolsButton.setText(symbolMode
                 ? (latinScript ? "ABC" : "АБВ")
                 : "123/#+=");
+        emojiButton.setText("😀");
         buildLetterRows();
         if (!symbolMode) handler.post(this::updateAutomaticShift);
         showStatus(symbolMode
                 ? "Бројеви и посебни знакови"
                 : (latinScript ? "Српска латиница" : "Српска ћирилица"));
+    }
+
+    private void toggleEmoji() {
+        emojiMode = !emojiMode;
+        symbolMode = false;
+        shifted = !emojiMode && capsLock;
+        symbolsButton.setText("123/#+=");
+        emojiButton.setText(emojiMode
+                ? (latinScript ? "ABC" : "АБВ")
+                : "😀");
+        shiftButton.setEnabled(!emojiMode);
+        updateShiftButtonLabel();
+        buildLetterRows();
+        if (!emojiMode) handler.post(this::updateAutomaticShift);
     }
 
     private void commitText(String value) {
@@ -315,7 +415,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void updateAutomaticShift() {
-        if (symbolMode || capsLock || shiftButton == null) return;
+        if (symbolMode || emojiMode || capsLock || shiftButton == null) return;
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
         boolean shouldShift = startsNewSentence(connection);
