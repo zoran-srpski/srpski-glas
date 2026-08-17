@@ -19,6 +19,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -108,7 +109,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         switchButton.setOnLongClickListener(v -> {
             switchButton.setText("⇄");
             v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            switchToNextInputMethod(false);
+            InputMethodManager manager =
+                    getSystemService(InputMethodManager.class);
+            if (manager != null) manager.showInputMethodPicker();
             return true;
         });
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
