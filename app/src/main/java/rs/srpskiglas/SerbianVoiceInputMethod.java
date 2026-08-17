@@ -385,6 +385,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "sr-RS");
         intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        intent.putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
+                2000L);
+        intent.putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                1500L);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, false);
         }
@@ -404,7 +410,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void continueListening() {
         listening = false;
-        if (continuousMode) handler.postDelayed(this::startVoiceInput, 350);
+        if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
     }
 
     private void deleteOneCharacter() {
@@ -542,7 +548,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         listening = false;
         if (continuousMode) {
             showStatus("Пауза — настављам да слушам…");
-            handler.postDelayed(this::startVoiceInput, 500);
+            handler.postDelayed(this::startVoiceInput, 200);
         } else {
             finishListening("Заустављено");
         }
