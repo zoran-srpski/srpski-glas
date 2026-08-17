@@ -434,9 +434,34 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private void showStatus(String text) {
         if (micButton != null && continuousMode) {
-            micButton.setText(latinScript
-                    ? SerbianTransliterator.convertLatin(text)
-                    : text);
+            micButton.setText(latinScript ? uiTextLatin(text) : text);
+        }
+    }
+
+    private String uiTextLatin(String text) {
+        switch (text) {
+            case "Препознавање говора није доступно":
+                return "Prepoznavanje govora nije dostupno";
+            case "Слушам…": return "Slušam…";
+            case "Заустављено — спреман": return "Zaustavljeno — spreman";
+            case "Настави да говориш…": return "Nastavi da govoriš…";
+            case "Унето — настављам да слушам…":
+                return "Uneto — nastavljam da slušam…";
+            case "Пауза — настављам да слушам…":
+                return "Pauza — nastavljam da slušam…";
+            case "Заустављено": return "Zaustavljeno";
+            case "Говори…": return "Govori…";
+            case "Препознајем…": return "Prepoznajem…";
+            case "Обрађујем…": return "Obrađujem…";
+            case "Латиница — пиши или диктирај":
+                return "Latinica — piši ili diktiraj";
+            case "Ћирилица — пиши или диктирај":
+                return "Ćirilica — piši ili diktiraj";
+            case "Бројеви и посебни знакови":
+                return "Brojevi i posebni znakovi";
+            case "Српска латиница": return "Srpska latinica";
+            case "Српска ћирилица": return "Srpska ćirilica";
+            default: return text;
         }
     }
 
