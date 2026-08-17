@@ -57,6 +57,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean lastSpaceAddedManually;
     private boolean dictationContextKnown;
     private boolean dictationNextStartsSentence;
+    private boolean speechStarted;
+    private int startSilenceRetries;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -400,6 +402,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         } else {
             continuousMode = true;
             dictationContextKnown = false;
+            speechStarted = false;
+            startSilenceRetries = 0;
             micButton.setText(stopDictationButtonLabel());
             startVoiceInput();
         }
@@ -414,7 +418,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             String message = latinScript
                     ? "Nema internet veze. Uključi internet i pokušaj ponovo."
                     : "Нема интернет везе. Укључи интернет и покушај поново.";
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            showTemporaryMicMessage(message);
             return;
         }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
@@ -456,6 +460,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             intent.putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, false);
         }
         showStatus("Слушам…");
+        speechStarted = false;
         listening = true;
         recognizer.startListening(intent);
     }
@@ -660,12 +665,20 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onError(int error) {
         listening = false;
-        showRecognitionError(error);
+        if ((error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                || error == SpeechRecognizer.ERROR_NO_MATCH)
+                && !speechStarted && continuousMode
+                && startSilenceRetries < 4) {
+            startSilenceRetries++;
+            handler.postDelayed(this::startVoiceInput, 120);
+            return;
+        }
         if (continuousMode) {
             finishDictationAfterPause();
         } else {
             finishListening("Заустављено");
         }
+        showRecognitionError(error);
     }
 
     private void showRecognitionError(int error) {
@@ -705,7 +718,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                         ? "Diktiranje nije uspelo. Pokušaj ponovo."
                         : "Диктирање није успело. Покушај поново.";
         }
+        showTemporaryMicMessage(message);
+    }
+
+    private void showTemporaryMicMessage(String message) {
+        if (micButton != null) micButton.setText(message);
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        handler.postDelayed(() -> {
+            if (micButton != null && !continuousMode && !listening) {
+                micButton.setText(dictationButtonLabel());
+            }
+        }, 4500);
     }
 
     @Override public void onFinishInputView(boolean finishingInput) {
@@ -724,7 +747,11 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     @Override public void onReadyForSpeech(Bundle params) { showStatus("Говори…"); }
-    @Override public void onBeginningOfSpeech() { showStatus("Препознајем…"); }
+    @Override public void onBeginningOfSpeech() {
+        speechStarted = true;
+        startSilenceRetries = 0;
+        showStatus("Препознајем…");
+    }
     @Override public void onRmsChanged(float rmsdB) {}
     @Override public void onBufferReceived(byte[] buffer) {}
     @Override public void onEndOfSpeech() { showStatus("Обрађујем…"); }
