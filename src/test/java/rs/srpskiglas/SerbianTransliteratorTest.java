@@ -50,6 +50,14 @@ public final class SerbianTransliteratorTest {
                 "За мене је добро", false),
                 "за мене је добро");
 
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "ОК Хајде да видимо", true),
+                "ОК хајде да видимо");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "OK Hajde da vidimo", true),
+                "OK hajde da vidimo");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }
