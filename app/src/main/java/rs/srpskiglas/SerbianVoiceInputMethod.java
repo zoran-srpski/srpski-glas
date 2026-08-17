@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.KeyEvent;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
@@ -100,7 +101,14 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         keyboardBody = view.findViewById(R.id.keyboardBody);
         hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
+        switchButton.setOnClickListener(v -> Toast.makeText(
+                this,
+                latinScript
+                        ? "Zadržite dugme za promenu tastature."
+                        : "Задржите дугме за промену тастатуре.",
+                Toast.LENGTH_SHORT).show());
         switchButton.setOnLongClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             switchToNextInputMethod(false);
             return true;
         });
