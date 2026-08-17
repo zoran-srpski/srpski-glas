@@ -497,7 +497,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             }
         }
         enterButton.setText(label);
-        enterButton.setTextSize("↲".equals(label) ? 30 : 14);
+        enterButton.setTextSize("↲".equals(label) ? 26 : 14);
     }
 
     private void toggleVoiceInput() {
