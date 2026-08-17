@@ -38,6 +38,18 @@ public final class SerbianTransliteratorTest {
                 "Da li dolaziš znak pitanja"),
                 "Da li dolaziš?");
 
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Ово Зато што је добро", true),
+                "Ово зато што је добро");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Данас идемо у Ниш. Онда зовемо ОК сервис", true),
+                "Данас идемо у Ниш. Онда зовемо ОК сервис");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "За мене је добро", false),
+                "за мене је добро");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }
