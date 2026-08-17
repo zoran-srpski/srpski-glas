@@ -52,8 +52,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean symbolMode;
     private boolean lastSpaceAddedByDictation;
     private boolean lastSpaceAddedManually;
-    private boolean partialComposing;
-    private boolean partialStartsNewSentence;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -427,7 +425,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "sr-RS");
-        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
         intent.putExtra(
                 RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
@@ -437,9 +435,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 1500L);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.putExtra(RecognizerIntent.EXTRA_MASK_OFFENSIVE_WORDS, false);
-            intent.putExtra(
-                    RecognizerIntent.EXTRA_SEGMENTED_SESSION,
-                    RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS);
         }
         showStatus("Слушам…");
         listening = true;
@@ -450,11 +445,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         continuousMode = false;
         listening = false;
         handler.removeCallbacksAndMessages(null);
-        InputConnection connection = getCurrentInputConnection();
-        if (partialComposing && connection != null) {
-            connection.finishComposingText();
-        }
-        partialComposing = false;
         if (recognizer != null) recognizer.cancel();
         if (micButton != null) micButton.setText(dictationButtonLabel());
         showStatus("Заустављено — спреман");
@@ -539,56 +529,36 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         showStatus(message);
     }
 
-    private String bestConvertedResult(Bundle results) {
+    @Override public void onResults(Bundle results) {
+        if (!continuousMode) return;
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
-        if (matches == null || matches.isEmpty()) return null;
+        if (matches == null || matches.isEmpty()) {
+            finishListening("Настави да говориш…");
+            continueListening();
+            return;
+        }
         String converted = latinScript
                 ? SerbianTransliterator.convertLatin(matches.get(0))
                 : SerbianTransliterator.convert(matches.get(0));
-        return normalizePunctuationSpacing(converted);
-    }
-
-    private void commitRecognitionResult(Bundle results) {
-        if (!continuousMode) return;
-        String converted = bestConvertedResult(results);
-        if (converted == null || converted.isEmpty()) return;
+        converted = normalizePunctuationSpacing(converted);
         InputConnection connection = getCurrentInputConnection();
-        if (connection == null) return;
-        boolean newSentence = partialComposing
-                ? partialStartsNewSentence
-                : startsNewSentence(connection);
-        if (!partialComposing && startsWithClosingPunctuation(converted)
-                && lastSpaceAddedByDictation) {
-            removeWhitespaceBeforeCursor(connection);
+        if (connection != null) {
+            if (startsWithClosingPunctuation(converted)
+                    && lastSpaceAddedByDictation) {
+                removeWhitespaceBeforeCursor(connection);
+            }
+            if (startsNewSentence(connection)) {
+                converted = uppercaseFirstLetter(converted);
+            } else {
+                converted = lowercaseFirstLetter(converted);
+            }
+            connection.commitText(converted + " ", 1);
+            lastSpaceAddedByDictation = true;
+            lastSpaceAddedManually = false;
         }
-        converted = newSentence
-                ? uppercaseFirstLetter(converted)
-                : lowercaseFirstLetter(converted);
-        connection.commitText(converted + " ", 1);
-        connection.finishComposingText();
-        partialComposing = false;
-        lastSpaceAddedByDictation = true;
-        lastSpaceAddedManually = false;
-    }
-
-    @Override public void onResults(Bundle results) {
-        if (!continuousMode) return;
-        commitRecognitionResult(results);
         finishListening("Унето — настављам да слушам…");
         continueListening();
-    }
-
-    @Override public void onSegmentResults(Bundle segmentResults) {
-        if (!continuousMode) return;
-        commitRecognitionResult(segmentResults);
-        finishListening("Слушам…");
-    }
-
-    @Override public void onEndOfSegmentedSession() {
-        listening = false;
-        partialComposing = false;
-        if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
     }
 
     private String normalizePunctuationSpacing(String text) {
@@ -664,24 +634,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public void onRmsChanged(float rmsdB) {}
     @Override public void onBufferReceived(byte[] buffer) {}
     @Override public void onEndOfSpeech() { showStatus("Обрађујем…"); }
-    @Override public void onPartialResults(Bundle partialResults) {
-        if (!continuousMode) return;
-        String converted = bestConvertedResult(partialResults);
-        if (converted == null || converted.isEmpty()) return;
-        InputConnection connection = getCurrentInputConnection();
-        if (connection == null) return;
-        if (!partialComposing) {
-            partialStartsNewSentence = startsNewSentence(connection);
-            if (startsWithClosingPunctuation(converted)
-                    && lastSpaceAddedByDictation) {
-                removeWhitespaceBeforeCursor(connection);
-            }
-        }
-        converted = partialStartsNewSentence
-                ? uppercaseFirstLetter(converted)
-                : lowercaseFirstLetter(converted);
-        connection.setComposingText(converted, 1);
-        partialComposing = true;
-    }
+    @Override public void onPartialResults(Bundle partialResults) {}
     @Override public void onEvent(int eventType, Bundle params) {}
 }
