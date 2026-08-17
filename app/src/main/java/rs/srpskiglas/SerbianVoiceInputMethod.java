@@ -100,7 +100,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         keyboardBody = view.findViewById(R.id.keyboardBody);
         hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
-        switchButton.setOnClickListener(v -> switchToNextInputMethod(false));
+        switchButton.setOnLongClickListener(v -> {
+            switchToNextInputMethod(false);
+            return true;
+        });
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
         symbolsButton.setOnClickListener(v -> toggleSymbols());
