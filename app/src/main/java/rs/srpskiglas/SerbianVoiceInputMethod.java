@@ -215,7 +215,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 if (shifted) key = key.toUpperCase(new java.util.Locale("sr"));
                 Button keyButton = new Button(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        0, dp(46), 1f);
+                        0, dp(42), 1f);
                 params.setMargins(dp(1), dp(1), dp(1), dp(1));
                 keyButton.setLayoutParams(params);
                 keyButton.setMinWidth(0);
@@ -228,7 +228,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 row.addView(keyButton);
             }
             letterRows.addView(row, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dp(48)));
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(44)));
         }
     }
 
@@ -238,7 +238,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         categories.setGravity(Gravity.CENTER);
         for (int i = 0; i < EMOJI_CATEGORY_LABELS.length; i++) {
             Button category = new Button(this);
-            category.setLayoutParams(new LinearLayout.LayoutParams(0, dp(40), 1f));
+            category.setLayoutParams(new LinearLayout.LayoutParams(0, dp(36), 1f));
             category.setMinWidth(0);
             category.setPadding(0, 0, 0, 0);
             category.setAllCaps(false);
@@ -252,11 +252,11 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             categories.addView(category);
         }
         letterRows.addView(categories, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(40)));
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(36)));
 
         String[] values = EMOJI_CATEGORIES[emojiCategory];
-        int perRow = (values.length + 2) / 3;
-        for (int rowIndex = 0; rowIndex < 3; rowIndex++) {
+        int perRow = (values.length + 1) / 2;
+        for (int rowIndex = 0; rowIndex < 2; rowIndex++) {
             HorizontalScrollView scroller = new HorizontalScrollView(this);
             scroller.setHorizontalScrollBarEnabled(false);
             scroller.setFillViewport(true);
@@ -267,7 +267,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             for (int i = start; i < end; i++) {
                 Button keyButton = new Button(this);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        dp(52), dp(48));
+                        dp(50), dp(42));
                 params.setMargins(dp(1), dp(1), dp(1), dp(1));
                 keyButton.setLayoutParams(params);
                 keyButton.setMinWidth(0);
@@ -281,7 +281,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             }
             scroller.addView(row);
             letterRows.addView(scroller, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, dp(50)));
+                    LinearLayout.LayoutParams.MATCH_PARENT, dp(44)));
         }
     }
 
@@ -861,13 +861,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             micButton.setSingleLine(true);
             micButton.setMaxLines(1);
             ViewGroup.LayoutParams buttonParams = micButton.getLayoutParams();
-            buttonParams.height = dp(58);
+            buttonParams.height = dp(54);
             micButton.setLayoutParams(buttonParams);
         }
         if (scriptButton != null) scriptButton.setVisibility(View.VISIBLE);
         if (topControlRow != null) {
             ViewGroup.LayoutParams rowParams = topControlRow.getLayoutParams();
-            rowParams.height = dp(58);
+            rowParams.height = dp(54);
             topControlRow.setLayoutParams(rowParams);
         }
     }
