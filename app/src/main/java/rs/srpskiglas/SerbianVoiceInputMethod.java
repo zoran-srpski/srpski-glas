@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -65,6 +66,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean dictationNextStartsSentence;
     private boolean speechStarted;
     private int startSilenceRetries;
+    private long suppressKeyboardAutoOpenUntil;
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
             deleteOneCharacter();
@@ -175,6 +177,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             setKeyboardExpanded(true);
             lastSpaceAddedByDictation = false;
             lastSpaceAddedManually = false;
+        } else if (keyboardBody != null
+                && keyboardBody.getVisibility() != View.VISIBLE
+                && SystemClock.uptimeMillis() >= suppressKeyboardAutoOpenUntil) {
+            setKeyboardExpanded(true);
         }
         handler.post(this::updateAutomaticShift);
     }
@@ -184,11 +190,21 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             int candidatesEnd) {
         super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart,
                 newSelEnd, candidatesStart, candidatesEnd);
+        boolean selectionChanged = oldSelStart != newSelStart
+                || oldSelEnd != newSelEnd;
+        if (selectionChanged && keyboardBody != null
+                && keyboardBody.getVisibility() != View.VISIBLE
+                && SystemClock.uptimeMillis() >= suppressKeyboardAutoOpenUntil) {
+            setKeyboardExpanded(true);
+        }
         handler.post(this::updateAutomaticShift);
     }
 
     private void setKeyboardExpanded(boolean expanded) {
         if (openKeyboardButton == null || keyboardBody == null) return;
+        if (!expanded) {
+            suppressKeyboardAutoOpenUntil = SystemClock.uptimeMillis() + 350L;
+        }
         openKeyboardButton.setVisibility(expanded ? View.GONE : View.VISIBLE);
         keyboardBody.setVisibility(expanded ? View.VISIBLE : View.GONE);
         keyboardBody.requestLayout();
@@ -711,6 +727,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             }
             converted = SerbianTransliterator.normalizeUnexpectedCapitals(
                     converted, shouldStartSentence);
+            suppressKeyboardAutoOpenUntil = SystemClock.uptimeMillis() + 1000L;
             connection.commitText(converted + " ", 1);
             dictationNextStartsSentence =
                     endsWithSentencePunctuation(converted);
