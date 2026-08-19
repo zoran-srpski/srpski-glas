@@ -59,6 +59,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean latinScript;
     private boolean shifted;
     private boolean capsLock;
+    private boolean suppressShiftClickAfterLongPress;
     private boolean symbolMode;
     private boolean emojiMode;
     private int emojiCategory;
@@ -186,8 +187,24 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         scriptButton.setOnClickListener(v -> toggleScript());
         symbolsButton.setOnClickListener(v -> toggleSymbols());
         emojiButton.setOnClickListener(v -> toggleEmoji());
-        shiftButton.setOnClickListener(v -> toggleShift());
-        shiftButton.setOnLongClickListener(v -> toggleCapsLock());
+        shiftButton.setOnClickListener(v -> {
+            if (suppressShiftClickAfterLongPress) return;
+            toggleShift();
+        });
+        shiftButton.setOnLongClickListener(v -> {
+            suppressShiftClickAfterLongPress = true;
+            return toggleCapsLock();
+        });
+        shiftButton.setOnTouchListener((v, event) -> {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP
+                    || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                // A long press can otherwise be followed by the normal click on
+                // some Android versions. Clear the guard only after that event
+                // has had a chance to run.
+                keyHandler.post(() -> suppressShiftClickAfterLongPress = false);
+            }
+            return false;
+        });
         comma.setOnClickListener(v -> commitText(","));
         spaceButton.setOnClickListener(v -> commitText(" "));
         period.setOnClickListener(v -> commitText("."));

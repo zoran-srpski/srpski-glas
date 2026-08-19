@@ -16,11 +16,11 @@ public final class SerbianTransliterator {
                     "a", "ali", "da", "dakle", "i", "ili", "jer", "kad", "kada",
                     "hajde", "kako", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
                     "pa", "po", "pre", "sad", "sada", "sa", "samo", "tada", "tako",
-                    "to", "u", "za", "zato", "zatim", "što",
+                    "to", "u", "za", "zato", "zatim", "znači", "što",
                     "а", "али", "да", "дакле", "и", "или", "јер", "кад", "када",
                     "хајде", "како", "међутим", "на", "након", "не", "него", "онда", "ово",
                     "па", "по", "пре", "сад", "сада", "са", "само", "тада", "тако",
-                    "то", "у", "за", "зато", "затим", "што"));
+                    "то", "у", "за", "зато", "затим", "значи", "што"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|pitanja|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");

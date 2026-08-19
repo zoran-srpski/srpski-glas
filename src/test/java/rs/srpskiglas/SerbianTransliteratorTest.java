@@ -43,6 +43,14 @@ public final class SerbianTransliteratorTest {
                 "Ово зато што је добро");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Сада ћемо Значи наставити", true),
+                "Сада ћемо значи наставити");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Sada ćemo Znači nastaviti", true),
+                "Sada ćemo znači nastaviti");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Данас идемо у Ниш. Онда зовемо ОК сервис", true),
                 "Данас идемо у Ниш. Онда зовемо ОК сервис");
 
