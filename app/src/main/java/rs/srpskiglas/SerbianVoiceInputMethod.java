@@ -205,6 +205,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         super.onStartInputView(info, restarting);
         updateEditorAction(info);
         if (!restarting) {
+            resetScriptToCyrillic();
             setKeyboardExpanded(true);
             lastSpaceAddedByDictation = false;
             lastSpaceAddedManually = false;
@@ -356,6 +357,24 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         showStatus(latinScript
                 ? "Латиница — пиши или диктирај"
                 : "Ћирилица — пиши или диктирај");
+    }
+
+    private void resetScriptToCyrillic() {
+        if (!latinScript && !symbolMode && !emojiMode) return;
+        latinScript = false;
+        symbolMode = false;
+        emojiMode = false;
+        if (scriptButton != null) scriptButton.setText("Ћир/Lat");
+        if (symbolsButton != null) symbolsButton.setText("123/#+=");
+        if (emojiButton != null) emojiButton.setText("😀");
+        if (shiftButton != null) shiftButton.setEnabled(true);
+        if (micButton != null) {
+            micButton.setText(continuousMode
+                    ? stopDictationButtonLabel()
+                    : dictationButtonLabel());
+        }
+        updateKeyboardControlLabels();
+        buildLetterRows();
     }
 
     private String dictationButtonLabel() {
