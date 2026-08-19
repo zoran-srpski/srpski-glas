@@ -58,6 +58,14 @@ public final class SerbianTransliteratorTest {
                 "OK Hajde da vidimo", true),
                 "OK hajde da vidimo");
 
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Ок хајде да видимо", true),
+                "ОК хајде да видимо");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Sve je ok", true),
+                "Sve je OK");
+
         System.out.println("All Serbian transliteration tests passed.");
     }
 }
