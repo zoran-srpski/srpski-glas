@@ -204,6 +204,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        restoreMicButtonLayout();
+        if (micButton != null && !continuousMode && !listening) {
+            micButton.setText(dictationButtonLabel());
+        }
         updateEditorAction(info);
         if (!restarting) {
             resetScriptToCyrillic();
