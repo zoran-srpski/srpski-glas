@@ -105,6 +105,14 @@ public final class SerbianTransliterator {
             while (i < out.length() && Character.isLetter(out.charAt(i))) i++;
             String word = out.substring(wordStart, i);
             String lower = word.toLowerCase(Locale.ROOT);
+            if (lower.equals("ок") || lower.equals("ok")) {
+                out.setCharAt(wordStart,
+                        Character.toUpperCase(out.charAt(wordStart)));
+                out.setCharAt(wordStart + 1,
+                        Character.toUpperCase(out.charAt(wordStart + 1)));
+                sentenceStart = false;
+                continue;
+            }
             boolean allCapsAbbreviation = word.length() > 1
                     && word.equals(word.toUpperCase(Locale.ROOT));
             if (!sentenceStart && !allCapsAbbreviation
