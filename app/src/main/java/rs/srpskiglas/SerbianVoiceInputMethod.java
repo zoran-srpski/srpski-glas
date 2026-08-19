@@ -68,6 +68,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private boolean dictationNextStartsSentence;
     private boolean speechStarted;
     private int startSilenceRetries;
+    private long initialSpeechDeadline;
     private long suppressKeyboardAutoOpenUntil;
     private final Runnable restoreSwitchKeyboardButton = () -> {
         if (switchKeyboardButton == null) return;
@@ -575,6 +576,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             dictationContextKnown = false;
             speechStarted = false;
             startSilenceRetries = 0;
+            initialSpeechDeadline = SystemClock.uptimeMillis() + 5000L;
             micButton.setText(stopDictationButtonLabel());
             startVoiceInput();
         }
@@ -754,6 +756,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches == null || matches.isEmpty()) {
+            if (continuousMode
+                    && SystemClock.uptimeMillis() < initialSpeechDeadline) {
+                listening = false;
+                handler.postDelayed(this::startVoiceInput, 120);
+                return;
+            }
             finishDictationAfterPause();
             return;
         }
@@ -845,8 +853,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         listening = false;
         if ((error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
                 || error == SpeechRecognizer.ERROR_NO_MATCH)
-                && !speechStarted && continuousMode
-                && startSilenceRetries < 4) {
+                && continuousMode
+                && SystemClock.uptimeMillis() < initialSpeechDeadline) {
             startSilenceRetries++;
             handler.postDelayed(this::startVoiceInput, 120);
             return;
