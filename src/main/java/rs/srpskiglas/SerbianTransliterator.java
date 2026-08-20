@@ -23,7 +23,10 @@ public final class SerbianTransliterator {
                     "то", "у", "за", "зато", "затим", "значи", "што"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
-            "(?iu)(?:\\s+|^)(?:znak\\s+(zarez|tačka|upitnik|pitanja|uzvičnik)|komanda\\s+(novi red))(?=\\s|$)");
+            "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
+                    + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|apostrof|"
+                    + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
+                    + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
         if (dictatedText == null || dictatedText.trim().isEmpty()) return "";
@@ -60,13 +63,21 @@ public final class SerbianTransliterator {
                 case "upitnik":
                 case "pitanja": replacement = "?"; break;
                 case "uzvičnik": replacement = "!"; break;
+                case "dve tačke":
+                case "dvotačka": replacement = ":"; break;
+                case "kosa crta": replacement = "/"; break;
+                case "apostrof": replacement = "'"; break;
+                case "tačka zarez": replacement = ";"; break;
+                case "otvorena zagrada": replacement = " ("; break;
+                case "zatvorena zagrada": replacement = ")"; break;
                 default: replacement = "\n";
             }
             matcher.appendReplacement(out, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(out);
-        String result = out.toString().trim().replaceAll("[ \\t]+([,.?!])", "$1");
-        result = result.replaceAll("([,.?!])(?=\\p{L})", "$1 ");
+        String result = out.toString().trim().replaceAll("[ \\t]+([,.?!:;)/'])", "$1");
+        result = result.replaceAll("([(/'])[ \\t]+", "$1");
+        result = result.replaceAll("([,.?!:;])(?=\\p{L})", "$1 ");
         return capitalizeSentences(result);
     }
 

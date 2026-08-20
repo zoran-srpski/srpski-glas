@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 public final class SerbianVoiceInputMethod extends InputMethodService
         implements RecognitionListener {
     private static final Pattern WHITESPACE_BEFORE_CLOSING_PUNCTUATION =
-            Pattern.compile("[ \\t\\u00a0]+([.,!?:;%\\)\\]\\}])");
+            Pattern.compile("[ \\t\\u00a0]+([.,!?:;/%'\\)\\]\\}])");
     private SpeechRecognizer recognizer;
     private Button micButton;
     private Button switchKeyboardButton;
@@ -517,6 +517,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         return ".".equals(value) || ",".equals(value)
                 || "!".equals(value) || "?".equals(value)
                 || ":".equals(value) || ";".equals(value)
+                || "/".equals(value) || "'".equals(value)
                 || "%".equals(value) || ")".equals(value)
                 || "]".equals(value) || "}".equals(value);
     }
@@ -807,11 +808,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             converted = SerbianTransliterator.normalizeUnexpectedCapitals(
                     converted, shouldStartSentence);
             suppressKeyboardAutoOpenUntil = SystemClock.uptimeMillis() + 1000L;
-            connection.commitText(converted + " ", 1);
+            boolean addTrailingSpace = !endsWithTightRightPunctuation(converted);
+            connection.commitText(converted + (addTrailingSpace ? " " : ""), 1);
             dictationNextStartsSentence =
                     endsWithSentencePunctuation(converted);
             dictationContextKnown = true;
-            lastSpaceAddedByDictation = true;
+            lastSpaceAddedByDictation = addTrailingSpace;
             lastSpaceAddedManually = false;
         }
         finishDictationAfterPause();
@@ -827,6 +829,16 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             char c = text.charAt(i);
             if (Character.isWhitespace(c)) continue;
             return c == '.' || c == '?' || c == '!';
+        }
+        return false;
+    }
+
+    private boolean endsWithTightRightPunctuation(String text) {
+        if (text == null) return false;
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (Character.isWhitespace(c)) continue;
+            return c == '(' || c == '/' || c == '\'';
         }
         return false;
     }

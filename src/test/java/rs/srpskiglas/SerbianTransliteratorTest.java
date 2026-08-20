@@ -38,6 +38,19 @@ public final class SerbianTransliteratorTest {
                 "Da li dolaziš znak pitanja"),
                 "Da li dolaziš?");
 
+        expect(SerbianTransliterator.convert(
+                "Objašnjenje znak dve tačke prvi znak kosa crta drugi znak apostrof kraj"),
+                "Објашњење: први/други'крај");
+
+        expect(SerbianTransliterator.convertLatin(
+                "Objašnjenje znak dvotačka prvi znak kosa crta drugi znak apostrof kraj"),
+                "Objašnjenje: prvi/drugi'kraj");
+
+        expect(SerbianTransliterator.convert(
+                "Пример znak otvorena zagrada dodatak znak zatvorena zagrada "
+                        + "znak tačka zarez nastavak"),
+                "Пример (додатак); наставак");
+
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Ово Зато што је добро", true),
                 "Ово зато што је добро");
