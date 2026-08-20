@@ -11,16 +11,12 @@ import java.util.regex.Pattern;
 public final class SerbianTransliterator {
     private SerbianTransliterator() {}
 
-    private static final Set<String> COMMON_WORDS_GOOGLE_MAY_CAPITALIZE =
+    private static final Set<String> PROTECTED_PROPER_WORDS =
             new HashSet<>(Arrays.asList(
-                    "a", "ali", "da", "dakle", "i", "ili", "ima", "jer", "kad", "kada",
-                    "evo", "hajde", "hoćeš", "kako", "kojoj", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
-                    "pa", "po", "pre", "sad", "sada", "sa", "samo", "tada", "tako",
-                    "to", "u", "za", "zato", "zatim", "znači", "što",
-                    "а", "али", "да", "дакле", "и", "или", "има", "јер", "кад", "када",
-                    "ево", "хајде", "хоћеш", "како", "којој", "међутим", "на", "након", "не", "него", "онда", "ово",
-                    "па", "по", "пре", "сад", "сада", "са", "само", "тада", "тако",
-                    "то", "у", "за", "зато", "затим", "значи", "што"));
+                    "anđela", "beograd", "beogradska", "google", "hyundai", "niš", "njegoš",
+                    "srbija", "zoran",
+                    "анђела", "београд", "београдска", "гугл", "хјундаи", "ниш", "његош",
+                    "србија", "зоран"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
@@ -97,13 +93,15 @@ public final class SerbianTransliterator {
     }
 
     /**
-     * Google sometimes treats a pause as a new sentence and capitalizes a common
-     * joining word even though it did not return sentence punctuation. Correct
-     * those unambiguous cases while leaving names and all-caps abbreviations alone.
+     * Google sometimes treats a pause as a new sentence and capitalizes the next
+     * word even though it did not return sentence punctuation. Normalize every
+     * such title-cased word, while leaving known proper names, mixed-case product
+     * names and all-caps abbreviations alone.
      */
     static String normalizeUnexpectedCapitals(String text, boolean startsSentence) {
         StringBuilder out = new StringBuilder(text);
         boolean sentenceStart = startsSentence;
+        String previousWord = "";
         for (int i = 0; i < out.length();) {
             char c = out.charAt(i);
             if (!Character.isLetter(c)) {
@@ -116,24 +114,53 @@ public final class SerbianTransliterator {
             while (i < out.length() && Character.isLetter(out.charAt(i))) i++;
             String word = out.substring(wordStart, i);
             String lower = word.toLowerCase(Locale.ROOT);
+            String nextWord = nextWordLower(out, i);
             if (lower.equals("ок") || lower.equals("ok")) {
                 out.setCharAt(wordStart,
                         Character.toUpperCase(out.charAt(wordStart)));
                 out.setCharAt(wordStart + 1,
                         Character.toUpperCase(out.charAt(wordStart + 1)));
                 sentenceStart = false;
+                previousWord = lower;
                 continue;
             }
             boolean allCapsAbbreviation = word.length() > 1
                     && word.equals(word.toUpperCase(Locale.ROOT));
+            boolean mixedCaseName = hasUppercaseAfterFirst(word);
             if (!sentenceStart && !allCapsAbbreviation
+                    && !mixedCaseName
                     && Character.isUpperCase(word.charAt(0))
-                    && COMMON_WORDS_GOOGLE_MAY_CAPITALIZE.contains(lower)) {
+                    && !isProtectedProperWord(lower, previousWord, nextWord)) {
                 out.setCharAt(wordStart, Character.toLowerCase(word.charAt(0)));
             }
             sentenceStart = false;
+            previousWord = lower;
         }
         return out.toString();
+    }
+
+    private static boolean isProtectedProperWord(
+            String word, String previousWord, String nextWord) {
+        if (PROTECTED_PROPER_WORDS.contains(word)) return true;
+        return (word.equals("novi") && nextWord.equals("sad"))
+                || (word.equals("sad") && previousWord.equals("novi"))
+                || (word.equals("нови") && nextWord.equals("сад"))
+                || (word.equals("сад") && previousWord.equals("нови"));
+    }
+
+    private static String nextWordLower(CharSequence text, int from) {
+        int i = from;
+        while (i < text.length() && !Character.isLetter(text.charAt(i))) i++;
+        int start = i;
+        while (i < text.length() && Character.isLetter(text.charAt(i))) i++;
+        return text.subSequence(start, i).toString().toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean hasUppercaseAfterFirst(String word) {
+        for (int i = 1; i < word.length(); i++) {
+            if (Character.isUpperCase(word.charAt(i))) return true;
+        }
+        return false;
     }
 
     static String transliterate(String text) {

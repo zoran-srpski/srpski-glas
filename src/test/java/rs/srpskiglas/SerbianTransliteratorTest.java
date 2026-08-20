@@ -80,6 +80,22 @@ public final class SerbianTransliteratorTest {
                 "Хоћеш ли приступити изради следеће исправке?");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Да ли сад у овом пројекту могу разговоре да започињем у Новом ћаскању?", true),
+                "Да ли сад у овом пројекту могу разговоре да започињем у новом ћаскању?");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Ово више није Само списак унапред познатих речи", true),
+                "Ово више није само списак унапред познатих речи");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Идемо у Нови Сад, а сутра у Ниш", true),
+                "Идемо у Нови Сад, а сутра у Ниш");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Користим Google и mBanking, а возим Hyundai", true),
+                "Користим Google и mBanking, а возим Hyundai");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Sada ćemo Znači nastaviti", true),
                 "Sada ćemo znači nastaviti");
 
