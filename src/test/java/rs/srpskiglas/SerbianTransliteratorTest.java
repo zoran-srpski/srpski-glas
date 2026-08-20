@@ -60,6 +60,10 @@ public final class SerbianTransliteratorTest {
                 "Сада ћемо значи наставити");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Да ли дворана Београдска арена Има климу?", true),
+                "Да ли дворана Београдска арена има климу?");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Sada ćemo Znači nastaviti", true),
                 "Sada ćemo znači nastaviti");
 
