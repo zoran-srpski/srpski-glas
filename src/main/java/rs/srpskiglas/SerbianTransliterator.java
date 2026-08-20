@@ -14,11 +14,11 @@ public final class SerbianTransliterator {
     private static final Set<String> COMMON_WORDS_GOOGLE_MAY_CAPITALIZE =
             new HashSet<>(Arrays.asList(
                     "a", "ali", "da", "dakle", "i", "ili", "ima", "jer", "kad", "kada",
-                    "hajde", "kako", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
+                    "evo", "hajde", "hoćeš", "kako", "kojoj", "međutim", "na", "nakon", "ne", "nego", "onda", "ovo",
                     "pa", "po", "pre", "sad", "sada", "sa", "samo", "tada", "tako",
                     "to", "u", "za", "zato", "zatim", "znači", "što",
                     "а", "али", "да", "дакле", "и", "или", "има", "јер", "кад", "када",
-                    "хајде", "како", "међутим", "на", "након", "не", "него", "онда", "ово",
+                    "ево", "хајде", "хоћеш", "како", "којој", "међутим", "на", "након", "не", "него", "онда", "ово",
                     "па", "по", "пре", "сад", "сада", "са", "само", "тада", "тако",
                     "то", "у", "за", "зато", "затим", "значи", "што"));
 
