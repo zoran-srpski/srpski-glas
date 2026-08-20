@@ -64,6 +64,22 @@ public final class SerbianTransliteratorTest {
                 "Да ли дворана Београдска арена има климу?");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Не могу да нађем у Којој реченици. Међутим Ево сад је добро", true),
+                "Не могу да нађем у којој реченици. Међутим ево сад је добро");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Ne mogu da nađem u Kojoj rečenici. Međutim Evo sad je dobro", true),
+                "Ne mogu da nađem u kojoj rečenici. Međutim evo sad je dobro");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "ОК, Хоћеш ли приступити изради следеће исправке?", true),
+                "ОК, хоћеш ли приступити изради следеће исправке?");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Хоћеш ли приступити изради следеће исправке?", true),
+                "Хоћеш ли приступити изради следеће исправке?");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Sada ćemo Znači nastaviti", true),
                 "Sada ćemo znači nastaviti");
 
