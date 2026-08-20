@@ -96,6 +96,14 @@ public final class SerbianTransliteratorTest {
                 "Користим Google и mBanking, а возим Hyundai");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Имена су Владимир, Иван, Влада, Љубица и Злата", true),
+                "Имена су Владимир, Иван, Влада, Љубица и Злата");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
+                "Imena su Vladimir, Ivan, Vlada, Ljubica i Zlata", true),
+                "Imena su Vladimir, Ivan, Vlada, Ljubica i Zlata");
+
+        expect(SerbianTransliterator.normalizeUnexpectedCapitals(
                 "Sada ćemo Znači nastaviti", true),
                 "Sada ćemo znači nastaviti");
 
