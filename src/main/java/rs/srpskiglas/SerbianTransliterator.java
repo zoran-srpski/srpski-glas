@@ -22,6 +22,11 @@ public final class SerbianTransliterator {
                     "не", "него", "новом", "онда", "ово", "па", "по", "пре", "сад", "сада",
                     "са", "само", "тада", "тако", "то", "у", "за", "зато", "затим", "значи", "што"));
 
+    private static final Set<String> COMMON_FOREIGN_NAMES =
+            new HashSet<>(Arrays.asList(
+                    "android", "chatgpt", "facebook", "gboard", "google", "hyundai",
+                    "instagram", "iphone", "microsoft", "tiktok", "whatsapp", "youtube"));
+
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
                     + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|apostrof|"
@@ -32,7 +37,7 @@ public final class SerbianTransliterator {
         if (dictatedText == null || dictatedText.trim().isEmpty()) return "";
         String normalized = repairRecognition(dictatedText.trim());
         normalized = applySpokenPunctuation(normalized);
-        return transliterate(normalized);
+        return transliteratePreservingForeignWords(normalized);
     }
 
     /** Keeps Serbian Latin output while applying the same repairs and punctuation commands. */
@@ -143,6 +148,41 @@ public final class SerbianTransliterator {
     private static boolean isProtectedProperNamePart(String word, String previousWord) {
         return (word.equals("sad") && previousWord.equals("novi"))
                 || (word.equals("сад") && previousWord.equals("нови"));
+    }
+
+    /** Keeps obvious foreign words in their original Latin spelling. */
+    static String transliteratePreservingForeignWords(String text) {
+        StringBuilder out = new StringBuilder(text.length());
+        for (int i = 0; i < text.length();) {
+            if (!Character.isLetter(text.charAt(i))) {
+                out.append(text.charAt(i));
+                i++;
+                continue;
+            }
+
+            int wordStart = i;
+            while (i < text.length() && Character.isLetter(text.charAt(i))) i++;
+            String word = text.substring(wordStart, i);
+            if (shouldKeepLatinWord(word)) out.append(word);
+            else out.append(transliterate(word));
+        }
+        return out.toString().trim();
+    }
+
+    private static boolean shouldKeepLatinWord(String word) {
+        String lower = word.toLowerCase(Locale.ROOT);
+        if (COMMON_FOREIGN_NAMES.contains(lower)) return true;
+        for (int i = 0; i < lower.length(); i++) {
+            char c = lower.charAt(i);
+            if (c == 'q' || c == 'w' || c == 'x' || c == 'y') return true;
+        }
+        boolean allUppercase = word.length() > 1
+                && word.equals(word.toUpperCase(Locale.ROOT));
+        if (allUppercase) return false;
+        for (int i = 1; i < word.length(); i++) {
+            if (Character.isUpperCase(word.charAt(i))) return true;
+        }
+        return false;
     }
 
     static String transliterate(String text) {

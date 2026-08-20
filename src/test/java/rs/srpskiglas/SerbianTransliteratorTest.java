@@ -39,6 +39,20 @@ public final class SerbianTransliteratorTest {
                 "Da li dolaziš?");
 
         expect(SerbianTransliterator.convert(
+                "Koristim Google YouTube WhatsApp i ChatGPT"),
+                "Користим Google YouTube WhatsApp и ChatGPT");
+
+        expect(SerbianTransliterator.convert(
+                "Vozim Hyundai i koristim Microsoft programe"),
+                "Возим Hyundai и користим Microsoft програме");
+
+        expect(SerbianTransliterator.convert(
+                "Naš narod u Republici Srpskoj još uvek češće piše latinicom znak zarez "
+                        + "jer su tako učeni od malih nogu znak tačka"),
+                "Наш народ у Републици Српској још увек чешће пише латиницом, "
+                        + "јер су тако учени од малих ногу.");
+
+        expect(SerbianTransliterator.convert(
                 "Objašnjenje znak dve tačke prvi znak kosa crta drugi znak apostrof kraj"),
                 "Објашњење: први/други'крај");
 
