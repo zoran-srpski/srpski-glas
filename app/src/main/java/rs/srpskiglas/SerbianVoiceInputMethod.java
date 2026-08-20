@@ -815,6 +815,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             lastSpaceAddedManually = false;
         }
         finishDictationAfterPause();
+        // The dictated text may end with sentence punctuation. Refresh Shift
+        // after stopping dictation so the next manually typed letter starts in
+        // uppercase immediately, even when the editor delays selection updates.
+        handler.post(this::updateAutomaticShift);
     }
 
     private boolean endsWithSentencePunctuation(String text) {
