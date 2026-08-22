@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 
 public final class SerbianVoiceInputMethod extends InputMethodService
         implements RecognitionListener {
+    private static final long SCRIPT_RESET_AFTER_IDLE_MS = 3 * 60 * 1000L;
     private static final Pattern WHITESPACE_BEFORE_CLOSING_PUNCTUATION =
             Pattern.compile("[ \\t\\u00a0]+([.,!?:;/%'\\)\\]\\}])");
     private SpeechRecognizer recognizer;
@@ -74,6 +75,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private int startSilenceRetries;
     private long initialSpeechDeadline;
     private long suppressKeyboardAutoOpenUntil;
+    private long keyboardHiddenAt = -1L;
     private final Runnable restoreSwitchKeyboardButton = () -> {
         if (switchKeyboardButton == null) return;
         switchKeyboardButton.setText("⇄");
@@ -233,7 +235,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
         updateEditorAction(info);
         if (!restarting) {
-            resetScriptToCyrillic();
             setKeyboardExpanded(true);
             lastSpaceAddedByDictation = false;
             lastSpaceAddedManually = false;
@@ -247,7 +248,40 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onWindowShown() {
         super.onWindowShown();
+        restoreLettersAfterKeyboardReturn();
         applyLightNavigationBar();
+    }
+
+    @Override public void onWindowHidden() {
+        keyboardHiddenAt = SystemClock.elapsedRealtime();
+        super.onWindowHidden();
+    }
+
+    private void restoreLettersAfterKeyboardReturn() {
+        if (keyboardHiddenAt < 0L) return;
+        long idleTime = SystemClock.elapsedRealtime() - keyboardHiddenAt;
+        keyboardHiddenAt = -1L;
+        boolean resetScript = idleTime >= SCRIPT_RESET_AFTER_IDLE_MS;
+        if (!resetScript && !symbolMode && !emojiMode) return;
+        if (resetScript) latinScript = false;
+        symbolMode = false;
+        emojiMode = false;
+        shifted = capsLock;
+        if (scriptButton != null) scriptButton.setText("Ћир/Lat");
+        if (symbolsButton != null) symbolsButton.setText("123/#+=");
+        if (emojiButton != null) emojiButton.setText("😀");
+        if (shiftButton != null) {
+            shiftButton.setEnabled(true);
+            updateShiftButtonLabel();
+        }
+        if (micButton != null) {
+            micButton.setText(continuousMode
+                    ? stopDictationButtonLabel()
+                    : dictationButtonLabel());
+        }
+        updateKeyboardControlLabels();
+        buildLetterRows();
+        if (!capsLock) handler.post(this::updateAutomaticShift);
     }
 
     private void applyLightNavigationBar() {
