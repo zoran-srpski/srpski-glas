@@ -52,7 +52,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button shiftButton;
     private Button enterButton;
     private Button openKeyboardButton;
-    private Button hideKeyboardButton;
     private Button spaceButton;
     private LinearLayout letterRows;
     private LinearLayout keyboardBody;
@@ -154,7 +153,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         enterButton = view.findViewById(R.id.enterButton);
         openKeyboardButton = view.findViewById(R.id.openKeyboardButton);
         keyboardBody = view.findViewById(R.id.keyboardBody);
-        hideKeyboardButton = view.findViewById(R.id.hideKeyboardButton);
         micButton.setOnClickListener(v -> toggleVoiceInput());
         switchKeyboardButton.setOnClickListener(v -> {
             keyHandler.removeCallbacks(restoreSwitchKeyboardButton);
@@ -218,7 +216,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         period.setOnClickListener(v -> commitText("."));
         enterButton.setOnClickListener(v -> pressEditorAction());
         openKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(true));
-        hideKeyboardButton.setOnClickListener(v -> setKeyboardExpanded(false));
         setKeyboardExpanded(true);
         updateKeyboardControlLabels();
         buildLetterRows();
@@ -487,11 +484,6 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             openKeyboardButton.setText(latinScript
                     ? "Otvori tastaturu"
                     : "Отвори тастатуру");
-        }
-        if (hideKeyboardButton != null) {
-            hideKeyboardButton.setText(latinScript
-                    ? "Sakrij tastaturu"
-                    : "Сакриј тастатуру");
         }
         if (spaceButton != null) {
             spaceButton.setText(latinScript ? "RAZMAK" : "РАЗМАК");
