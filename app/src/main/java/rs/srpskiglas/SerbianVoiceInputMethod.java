@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -18,6 +19,8 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.Window;
+import android.view.WindowInsetsController;
 import android.view.KeyEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -114,6 +117,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     @Override public View onCreateInputView() {
+        applyLightNavigationBar();
         View view = getLayoutInflater().inflate(R.layout.keyboard_voice, null);
         final int left = view.getPaddingLeft();
         final int top = view.getPaddingTop();
@@ -131,6 +135,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             return insets;
         });
         view.requestApplyInsets();
+        view.post(this::applyLightNavigationBar);
         micButton = view.findViewById(R.id.keyboardMicButton);
         topControlRow = view.findViewById(R.id.topControlRow);
         switchKeyboardButton = view.findViewById(R.id.switchKeyboardButton);
@@ -221,6 +226,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        applyLightNavigationBar();
         restoreMicButtonLayout();
         if (micButton != null && !continuousMode && !listening) {
             micButton.setText(dictationButtonLabel());
@@ -237,6 +243,33 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             setKeyboardExpanded(true);
         }
         handler.post(this::updateAutomaticShift);
+    }
+
+    @Override public void onWindowShown() {
+        super.onWindowShown();
+        applyLightNavigationBar();
+    }
+
+    private void applyLightNavigationBar() {
+        if (getWindow() == null) return;
+        Window window = getWindow().getWindow();
+        if (window == null) return;
+        window.setNavigationBarColor(Color.rgb(246, 244, 238));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = window.getInsetsController();
+            if (controller != null) {
+                controller.setSystemBarsAppearance(
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            View decorView = window.getDecorView();
+            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility()
+                    | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
     }
 
     @Override public void onUpdateSelection(int oldSelStart, int oldSelEnd,
