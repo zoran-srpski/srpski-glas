@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 public final class SerbianVoiceInputMethod extends InputMethodService
         implements RecognitionListener {
     private static final long SCRIPT_RESET_AFTER_IDLE_MS = 3 * 60 * 1000L;
+    private static final long LETTERS_RESET_AFTER_IDLE_MS = 60 * 1000L;
     private static final Pattern WHITESPACE_BEFORE_CLOSING_PUNCTUATION =
             Pattern.compile("[ \\t\\u00a0]+([.,!?:;/%'\\)\\]\\}])");
     private SpeechRecognizer recognizer;
@@ -262,10 +263,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         long idleTime = SystemClock.elapsedRealtime() - keyboardHiddenAt;
         keyboardHiddenAt = -1L;
         boolean resetScript = idleTime >= SCRIPT_RESET_AFTER_IDLE_MS;
-        if (!resetScript && !symbolMode && !emojiMode) return;
+        boolean resetLetters = symbolMode
+                && idleTime >= LETTERS_RESET_AFTER_IDLE_MS;
+        boolean resetEmoji = emojiMode;
+        if (!resetScript && !resetLetters && !resetEmoji) return;
         if (resetScript) latinScript = false;
-        symbolMode = false;
-        emojiMode = false;
+        if (resetLetters) symbolMode = false;
+        if (resetEmoji) emojiMode = false;
         shifted = capsLock;
         if (scriptButton != null) scriptButton.setText("Ћир/Lat");
         if (symbolsButton != null) symbolsButton.setText("123/#+=");
