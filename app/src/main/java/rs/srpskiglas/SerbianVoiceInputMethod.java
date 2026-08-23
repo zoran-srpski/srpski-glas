@@ -568,14 +568,14 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     private String dictationButtonLabel() {
         return latinScript
-                ? "🎙  Diktiraj latinicom"
-                : "🎙  Диктирај ћирилицом";
+                ? "🎙  Diktiraj"
+                : "🎙  Диктирај";
     }
 
     private String stopDictationButtonLabel() {
         return latinScript
-                ? "⏹  Zaustavi diktiranje"
-                : "⏹  Заустави диктирање";
+                ? "⏹  Zaustavi"
+                : "⏹  Заустави";
     }
 
     private void updateKeyboardControlLabels() {
