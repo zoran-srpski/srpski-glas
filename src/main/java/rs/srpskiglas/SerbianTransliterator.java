@@ -77,7 +77,7 @@ public final class SerbianTransliterator {
                 case "dvotačka": replacement = ":"; break;
                 case "kosa crta": replacement = "/"; break;
                 case "navodnik":
-                    replacement = openingSpokenQuote ? " \"" : "\"";
+                    replacement = openingSpokenQuote ? " „" : "“";
                     openingSpokenQuote = !openingSpokenQuote;
                     break;
                 case "tačka zarez": replacement = ";"; break;
@@ -88,41 +88,36 @@ public final class SerbianTransliterator {
             matcher.appendReplacement(out, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(out);
-        String result = normalizeDoubleQuoteSpacing(out.toString())
+        String result = normalizeSerbianQuoteSpacing(out.toString())
                 .trim().replaceAll("[ \\t]+([,.?!:;)/'])", "$1");
         result = result.replaceAll("([(/'])[ \\t]+", "$1");
         result = result.replaceAll("([,.?!:;])(?=\\p{L})", "$1 ");
         return capitalizeSentences(result);
     }
 
-    private static String normalizeDoubleQuoteSpacing(String text) {
+     private static String normalizeSerbianQuoteSpacing(String text) {
         StringBuilder out = new StringBuilder(text.length());
-        boolean openingQuote = true;
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c != '"') {
-                out.append(c);
-                continue;
-            }
-            if (openingQuote) {
+            if (c == '„') {
                 out.append(c);
                 while (i + 1 < text.length()
                         && (text.charAt(i + 1) == ' ' || text.charAt(i + 1) == '\t')) {
                     i++;
                 }
-            } else {
+            } else if (c == '“') {
                 while (out.length() > 0
                         && (out.charAt(out.length() - 1) == ' '
                         || out.charAt(out.length() - 1) == '\t')) {
                     out.deleteCharAt(out.length() - 1);
                 }
                 out.append(c);
+            } else {
+                out.append(c);
             }
-            openingQuote = !openingQuote;
         }
         return out.toString();
     }
-
     static String capitalizeSentences(String text) {
         StringBuilder out = new StringBuilder(text.length());
         boolean capitalize = true;
