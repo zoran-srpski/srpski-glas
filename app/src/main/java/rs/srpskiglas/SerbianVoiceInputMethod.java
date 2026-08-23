@@ -359,7 +359,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 keyButton.setMinWidth(0);
                 keyButton.setPadding(0, 0, 0, 0);
                 keyButton.setText(key);
-                keyButton.setTextSize(17);
+                keyButton.setTextSize(20);
                 keyButton.setAllCaps(false);
                 final String value = key;
                 keyButton.setOnClickListener(v -> typeLetter(value));
