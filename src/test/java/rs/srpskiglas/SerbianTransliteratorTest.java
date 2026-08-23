@@ -28,11 +28,11 @@ public final class SerbianTransliteratorTest {
 
         expect(SerbianTransliterator.convert(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
-                "Рекао је \"долазим сутра\"; затим је отишао");
+                "Рекао је „долазим сутра“; затим је отишао");
 
         expect(SerbianTransliterator.convertLatin(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
-                "Rekao je \"dolazim sutra\"; zatim je otišao");
+                "Rekao je „dolazim sutra“; zatim je otišao");
 
         expect(SerbianTransliterator.convert(
                 "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
@@ -63,12 +63,12 @@ public final class SerbianTransliteratorTest {
         expect(SerbianTransliterator.convert(
                 "Objašnjenje znak dve tačke znak navodnik prvi znak kosa crta "
                         + "drugi znak navodnik"),
-                "Објашњење: \"први/други\"");
+                "Објашњење: „први/други“");
 
         expect(SerbianTransliterator.convertLatin(
                 "Objašnjenje znak dvotačka znak navodnik prvi znak kosa crta "
                         + "drugi znak navodnik"),
-                "Objašnjenje: \"prvi/drugi\"");
+                "Objašnjenje: „prvi/drugi“");
 
         expect(SerbianTransliterator.convert(
                 "Пример znak otvorena zagrada dodatak znak zatvorena zagrada "
