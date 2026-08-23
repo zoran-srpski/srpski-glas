@@ -27,6 +27,14 @@ public final class SerbianTransliteratorTest {
                 "Данас долазим, али касним. Да ли чекаш? Пожури!");
 
         expect(SerbianTransliterator.convert(
+                "Objašnjenje dve tačke prvi apostrof drugi tačka zarez kraj"),
+                "Објашњење: први'други; крај");
+
+        expect(SerbianTransliterator.convertLatin(
+                "Objašnjenje dvotačka prvi apostrof drugi tačka zarez kraj"),
+                "Objašnjenje: prvi'drugi; kraj");
+
+        expect(SerbianTransliterator.convert(
                 "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
                 "Данас су џем и ђак на столу. Ђак је стигао.");
 
