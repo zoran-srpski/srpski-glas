@@ -27,12 +27,12 @@ public final class SerbianTransliteratorTest {
                 "Данас долазим, али касним. Да ли чекаш? Пожури!");
 
         expect(SerbianTransliterator.convert(
-                "Objašnjenje dve tačke prvi apostrof drugi tačka zarez kraj"),
-                "Објашњење: први'други; крај");
+                "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
+                "Рекао је \"долазим сутра\"; затим је отишао");
 
         expect(SerbianTransliterator.convertLatin(
-                "Objašnjenje dvotačka prvi apostrof drugi tačka zarez kraj"),
-                "Objašnjenje: prvi'drugi; kraj");
+                "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
+                "Rekao je \"dolazim sutra\"; zatim je otišao");
 
         expect(SerbianTransliterator.convert(
                 "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
@@ -61,12 +61,14 @@ public final class SerbianTransliteratorTest {
                         + "јер су тако учени од малих ногу.");
 
         expect(SerbianTransliterator.convert(
-                "Objašnjenje znak dve tačke prvi znak kosa crta drugi znak apostrof kraj"),
-                "Објашњење: први/други'крај");
+                "Objašnjenje znak dve tačke znak navodnik prvi znak kosa crta "
+                        + "drugi znak navodnik"),
+                "Објашњење: \"први/други\"");
 
         expect(SerbianTransliterator.convertLatin(
-                "Objašnjenje znak dvotačka prvi znak kosa crta drugi znak apostrof kraj"),
-                "Objašnjenje: prvi/drugi'kraj");
+                "Objašnjenje znak dvotačka znak navodnik prvi znak kosa crta "
+                        + "drugi znak navodnik"),
+                "Objašnjenje: \"prvi/drugi\"");
 
         expect(SerbianTransliterator.convert(
                 "Пример znak otvorena zagrada dodatak znak zatvorena zagrada "
