@@ -86,7 +86,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (switchKeyboardButton == null) return;
         switchKeyboardButton.setText("⇄");
         switchKeyboardButton.setBackgroundTintList(
-                ColorStateList.valueOf(0xFFE1E3E2));
+                ColorStateList.valueOf(darkKeyboard ? 0xFF3B403D : 0xFFE1E3E2));
+        switchKeyboardButton.setTextColor(darkKeyboard ? Color.WHITE : 0xFF272B29);
     };
     private final Runnable repeatBackspace = new Runnable() {
         @Override public void run() {
