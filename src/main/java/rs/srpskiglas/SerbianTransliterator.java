@@ -28,11 +28,9 @@ public final class SerbianTransliterator {
                     "instagram", "iphone", "microsoft", "tiktok", "whatsapp", "youtube"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
-            "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
-                    + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|"
+            "(?iu)(?:\\s+|^)(?:(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|"
+                    + "dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|"
                     + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
-                    + "(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|"
-                    + "dvotačka|navodnik)|"
                     + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
@@ -64,7 +62,7 @@ public final class SerbianTransliterator {
         while (matcher.find()) {
             String command = matcher.group(1) != null
                     ? matcher.group(1)
-                    : (matcher.group(2) != null ? matcher.group(2) : matcher.group(3));
+                    : matcher.group(2);
             command = command.toLowerCase(Locale.ROOT);
             String replacement;
             switch (command) {
