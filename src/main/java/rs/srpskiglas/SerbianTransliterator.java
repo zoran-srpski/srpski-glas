@@ -60,6 +60,7 @@ public final class SerbianTransliterator {
     static String applySpokenPunctuation(String text) {
         Matcher matcher = SPOKEN_PUNCTUATION.matcher(" " + text);
         StringBuffer out = new StringBuffer();
+        boolean openingSpokenQuote = true;
         while (matcher.find()) {
             String command = matcher.group(1) != null
                     ? matcher.group(1)
@@ -75,7 +76,10 @@ public final class SerbianTransliterator {
                 case "dve tačke":
                 case "dvotačka": replacement = ":"; break;
                 case "kosa crta": replacement = "/"; break;
-                case "navodnik": replacement = "\""; break;
+                case "navodnik":
+                    replacement = openingSpokenQuote ? " \"" : "\"";
+                    openingSpokenQuote = !openingSpokenQuote;
+                    break;
                 case "tačka zarez": replacement = ";"; break;
                 case "otvorena zagrada": replacement = " ("; break;
                 case "zatvorena zagrada": replacement = ")"; break;
