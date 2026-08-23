@@ -31,6 +31,14 @@ public final class SerbianTransliteratorTest {
                 "Ово није добар знак.");
 
         expect(SerbianTransliterator.convert(
+                "Da li će raditi znak pitanja"),
+                "Да ли ће радити?");
+
+        expect(SerbianTransliterator.convert(
+                "Imam jedno pitanje tačka"),
+                "Имам једно питање.");
+
+        expect(SerbianTransliterator.convert(
                 "Prvi red novi red drugi red"),
                 "Први ред\nДруги ред");
 
