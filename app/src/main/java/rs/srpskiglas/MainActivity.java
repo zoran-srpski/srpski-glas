@@ -11,12 +11,10 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.ViewGroup;
 import android.speech.RecognizerIntent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +35,10 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        if (getIntent().getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
+            showSettingsScreen();
+            return;
+        }
         setContentView(R.layout.activity_main);
 
         resultText = findViewById(R.id.resultText);
@@ -76,61 +78,40 @@ public final class MainActivity extends Activity {
         dictate.setOnClickListener(v -> ensurePermissionAndDictate());
         copy.setOnClickListener(v -> copyResult());
         updateMicrophoneStatus();
-        if (getIntent().getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
-            findViewById(android.R.id.content).post(this::showSettingsDialog);
-        }
     }
 
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
         if (intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
-            findViewById(android.R.id.content).post(this::showSettingsDialog);
+            showSettingsScreen();
         }
     }
 
-    private void showSettingsDialog() {
+    private void showSettingsScreen() {
+        setContentView(R.layout.activity_settings);
         SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        int padding = dp(20);
-        content.setPadding(padding, dp(8), padding, 0);
-
-        TextView explanation = new TextView(this);
-        explanation.setText("Подешавања се примењују следећи пут када се тастатура прикаже.");
-        explanation.setTextSize(15);
-        explanation.setPadding(0, 0, 0, dp(12));
-        content.addView(explanation);
-
-        addSettingButton(content, "Величина слова", PREF_FONT_SIZE,
+        configureSettingButton(findViewById(R.id.settingsFontButton),
+                "Величина слова", PREF_FONT_SIZE,
                 new String[]{"small", "medium", "large"},
                 new String[]{"Мала", "Средња", "Велика"},
                 preferences.getString(PREF_FONT_SIZE, "medium"));
-        addSettingButton(content, "Тема тастатуре", PREF_THEME,
+        configureSettingButton(findViewById(R.id.settingsThemeButton),
+                "Тема тастатуре", PREF_THEME,
                 new String[]{"system", "light", "dark"},
                 new String[]{"Према телефону", "Светла", "Тамна"},
                 preferences.getString(PREF_THEME, "system"));
-        addSettingButton(content, "Вибрација тастера", PREF_HAPTIC,
+        configureSettingButton(findViewById(R.id.settingsHapticButton),
+                "Вибрација тастера", PREF_HAPTIC,
                 new String[]{"off", "weak", "normal"},
                 new String[]{"Искључена", "Слаба", "Нормална"},
                 preferences.getString(PREF_HAPTIC, "weak"));
-
-        new AlertDialog.Builder(this)
-                .setTitle("Подешавања тастатуре")
-                .setView(content)
-                .setPositiveButton("Готово", null)
-                .show();
+        findViewById(R.id.settingsDoneButton).setOnClickListener(v -> finish());
     }
 
-    private void addSettingButton(LinearLayout parent, String title, String key,
+    private void configureSettingButton(Button button, String title, String key,
             String[] values, String[] labels, String currentValue) {
-        Button button = new Button(this);
-        button.setAllCaps(false);
         button.setText(title + ": " + labelForValue(values, labels, currentValue));
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(54));
-        params.setMargins(0, 0, 0, dp(8));
-        button.setLayoutParams(params);
         button.setOnClickListener(v -> {
             int checked = indexOf(values,
                     getSharedPreferences(PREFERENCES, MODE_PRIVATE)
@@ -145,7 +126,6 @@ public final class MainActivity extends Activity {
                     })
                     .show();
         });
-        parent.addView(button);
     }
 
     private int indexOf(String[] values, String value) {
@@ -157,10 +137,6 @@ public final class MainActivity extends Activity {
 
     private String labelForValue(String[] values, String[] labels, String value) {
         return labels[indexOf(values, value)];
-    }
-
-    private int dp(int value) {
-        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void updateMicrophoneStatus() {
