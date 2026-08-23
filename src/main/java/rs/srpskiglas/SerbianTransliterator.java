@@ -28,9 +28,8 @@ public final class SerbianTransliterator {
                     "instagram", "iphone", "microsoft", "tiktok", "whatsapp", "youtube"));
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
-            "(?iu)(?:\\s+|^)(?:(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|"
-                    + "dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|"
-                    + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
+            "(?iu)(?:\\s+|^)(?:(znak\\s+(?:tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|otvorena\\s+zagrada|zatvorena\\s+zagrada))|"
+                    + "(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
                     + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
@@ -57,10 +56,14 @@ public final class SerbianTransliterator {
 
     static String applySpokenPunctuation(String text) {
         Matcher matcher = SPOKEN_PUNCTUATION.matcher(" " + text);
-        StringBuffer out = new StringBuffer();
-        boolean openingSpokenQuote = true;
-        while (matcher.find()) {
-            String command = matcher.group(1) != null
+                 if (matcher.group(1) != null) {
+                matcher.appendReplacement(out,
+                        Matcher.quoteReplacement(" " + matcher.group(1)));
+                continue;
+            }
+            String command = matcher.group(2) != null
+                    ? matcher.group(2)
+                    : matcher.group(3);ring command = matcher.group(1) != null
                     ? matcher.group(1)
                     : matcher.group(2);
             command = command.toLowerCase(Locale.ROOT);
