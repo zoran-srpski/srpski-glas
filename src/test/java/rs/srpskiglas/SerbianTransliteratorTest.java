@@ -36,7 +36,7 @@ public final class SerbianTransliteratorTest {
 
         expect(SerbianTransliterator.convertLatin(
                 "Prvi red komanda novi red drugi red"),
-                "Prvi red\nDrugi red");
+                "Prvi red komanda\nDrugi red");
 
         expect(SerbianTransliterator.convert(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
