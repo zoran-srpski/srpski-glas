@@ -29,7 +29,7 @@ public final class SerbianTransliterator {
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
-                    + "(novi\\s+red))(?=\\s|$)");
+                    + "(nov(?:i)?\\s+red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
         if (dictatedText == null || dictatedText.trim().isEmpty()) return "";
