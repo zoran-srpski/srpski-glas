@@ -23,6 +23,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public final class MainActivity extends Activity {
+    static final String EXTRA_OPEN_SETTINGS = "open_keyboard_settings";
     static final String PREFERENCES = "srpski_glas_preferences";
     static final String PREF_FONT_SIZE = "keyboard_font_size";
     static final String PREF_THEME = "keyboard_theme";
@@ -46,7 +47,6 @@ public final class MainActivity extends Activity {
         Button copy = findViewById(R.id.copyButton);
         Button enableKeyboard = findViewById(R.id.enableKeyboardButton);
         Button selectKeyboard = findViewById(R.id.selectKeyboardButton);
-        Button settings = findViewById(R.id.settingsButton);
 
         enableKeyboard.setOnClickListener(v -> {
             try {
@@ -75,8 +75,18 @@ public final class MainActivity extends Activity {
                 v -> requestAudioPermission(false));
         dictate.setOnClickListener(v -> ensurePermissionAndDictate());
         copy.setOnClickListener(v -> copyResult());
-        settings.setOnClickListener(v -> showSettingsDialog());
         updateMicrophoneStatus();
+        if (getIntent().getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
+            findViewById(android.R.id.content).post(this::showSettingsDialog);
+        }
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
+            findViewById(android.R.id.content).post(this::showSettingsDialog);
+        }
     }
 
     private void showSettingsDialog() {

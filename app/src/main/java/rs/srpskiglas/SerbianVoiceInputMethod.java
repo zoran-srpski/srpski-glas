@@ -152,6 +152,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         switchKeyboardButton = view.findViewById(R.id.switchKeyboardButton);
         Button backspace = view.findViewById(R.id.backspaceButton);
         scriptButton = view.findViewById(R.id.scriptButton);
+        Button keyboardSettingsButton =
+                view.findViewById(R.id.keyboardSettingsButton);
         symbolsButton = view.findViewById(R.id.symbolsButton);
         emojiButton = view.findViewById(R.id.emojiButton);
         shiftButton = view.findViewById(R.id.shiftButton);
@@ -200,6 +202,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         });
         backspace.setOnTouchListener((v, event) -> handleBackspaceTouch(event));
         scriptButton.setOnClickListener(v -> toggleScript());
+        keyboardSettingsButton.setOnClickListener(v -> openKeyboardSettings());
         symbolsButton.setOnClickListener(v -> toggleSymbols());
         emojiButton.setOnClickListener(v -> toggleEmoji());
         shiftButton.setOnClickListener(v -> {
@@ -533,6 +536,16 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         showStatus(latinScript
                 ? "Латиница — пиши или диктирај"
                 : "Ћирилица — пиши или диктирај");
+    }
+
+    private void openKeyboardSettings() {
+        stopDictationForManualInput();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_OPEN_SETTINGS, true);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
     }
 
     private void resetScriptToCyrillic() {

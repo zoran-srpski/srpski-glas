@@ -39,18 +39,6 @@
             android:textColor="#52615B"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/settingsButton"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="#E1E3E2"
-            android:text="⚙  Подешавања тастатуре"
-            android:textAllCaps="false"
-            android:textColor="#17221E"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
         <TextView
             android:id="@+id/step1Status"
             android:layout_width="match_parent"
