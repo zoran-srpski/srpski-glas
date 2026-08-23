@@ -879,10 +879,17 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             lastSpaceAddedByDictation = addTrailingSpace;
             lastSpaceAddedManually = false;
         }
-        finishDictationAfterPause();
-        // The dictated text may end with sentence punctuation. Refresh Shift
-        // after stopping dictation so the next manually typed letter starts in
-        // uppercase immediately, even when the editor delays selection updates.
+        if (endsWithSentencePunctuation(converted)) {
+            // A spoken full stop, question mark or exclamation mark finishes
+            // only the sentence, not the dictation session. Start a fresh
+            // recognizer cycle so the user can continue with the next sentence.
+            continueListening();
+        } else {
+            finishDictationAfterPause();
+        }
+        // Refresh Shift so the next manually typed letter starts in uppercase
+        // immediately after sentence punctuation, even when the editor delays
+        // selection updates.
         handler.post(this::updateAutomaticShift);
     }
 
