@@ -31,6 +31,14 @@ public final class SerbianTransliteratorTest {
                 "Ово није добар знак.");
 
         expect(SerbianTransliterator.convert(
+                "Prvi red novi red drugi red"),
+                "Први ред\nДруги ред");
+
+        expect(SerbianTransliterator.convertLatin(
+                "Prvi red komanda novi red drugi red"),
+                "Prvi red\nDrugi red");
+
+        expect(SerbianTransliterator.convert(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
                 "Рекао је „долазим сутра“; затим је отишао");
 
