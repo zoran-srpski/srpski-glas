@@ -31,7 +31,8 @@ public final class SerbianTransliterator {
             "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
                     + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|apostrof|"
                     + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
-                    + "(zarez|tačka|upitnik|uzvičnik)|"
+                    + "(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|"
+                    + "dvotačka|apostrof)|"
                     + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
