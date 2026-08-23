@@ -29,10 +29,10 @@ public final class SerbianTransliterator {
 
     private static final Pattern SPOKEN_PUNCTUATION = Pattern.compile(
             "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
-                    + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|apostrof|"
+                    + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|navodnik|"
                     + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
                     + "(tačka\\s+zarez|zarez|tačka|upitnik|uzvičnik|dve\\s+tačke|"
-                    + "dvotačka|apostrof)|"
+                    + "dvotačka|navodnik)|"
                     + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
@@ -75,7 +75,7 @@ public final class SerbianTransliterator {
                 case "dve tačke":
                 case "dvotačka": replacement = ":"; break;
                 case "kosa crta": replacement = "/"; break;
-                case "apostrof": replacement = "'"; break;
+                case "navodnik": replacement = "\""; break;
                 case "tačka zarez": replacement = ";"; break;
                 case "otvorena zagrada": replacement = " ("; break;
                 case "zatvorena zagrada": replacement = ")"; break;
