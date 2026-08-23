@@ -23,8 +23,8 @@ public final class SerbianTransliteratorTest {
                 "инјекција су необичне речи.");
 
         expect(SerbianTransliterator.convert(
-                "Tačka oslonca i decimalni zarez ostaju reči znak tačka"),
-                "Тачка ослонца и децимални зарез остају речи.");
+                "Danas dolazim zarez ali kasnim tačka da li čekaš upitnik požuri uzvičnik"),
+                "Данас долазим, али касним. Да ли чекаш? Пожури!");
 
         expect(SerbianTransliterator.convert(
                 "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
