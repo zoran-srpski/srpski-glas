@@ -95,7 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Поставите „Српски глас“ као тренутну тастатуру. Касније је можете мењати дугметом 🌐."
+            android:text="Поставите „Српски глас“ као тренутну тастатуру. Касније можете отворити избор других тастатура дугим притиском на тастер ⇄."
             android:textColor="#52615B"
             android:textSize="14sp" />
 

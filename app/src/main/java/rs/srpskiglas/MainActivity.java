@@ -8,6 +8,7 @@ import android.content.ClipboardManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.ViewGroup;
@@ -155,13 +156,19 @@ public final class MainActivity extends Activity {
     private void updateMicrophoneStatus() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 == PackageManager.PERMISSION_GRANTED) {
-            step3Status.setText("✓  3. Микрофон је дозвољен");
+            step3Status.setText("✓  3. Микрофон је дозвољен на овом уређају");
             microphonePermissionButton.setText(
-                    "Микрофон је већ дозвољен");
+                    "Дозвола за микрофон је одобрена");
+            microphonePermissionButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFFE1E3E2));
+            microphonePermissionButton.setTextColor(0xFF52615B);
             microphonePermissionButton.setEnabled(false);
         } else {
             step3Status.setText("③ Дозволите микрофон");
             microphonePermissionButton.setText("Дозволи микрофон");
+            microphonePermissionButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFF19785B));
+            microphonePermissionButton.setTextColor(0xFFFFFFFF);
             microphonePermissionButton.setEnabled(true);
         }
     }
