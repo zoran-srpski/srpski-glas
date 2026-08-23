@@ -27,8 +27,8 @@ public final class SerbianTransliteratorTest {
                 "Данас долазим, али касним. Да ли чекаш? Пожури!");
 
         expect(SerbianTransliterator.convert(
-                "Izraz znak tačka ostaje napisan rečima"),
-                "Израз знак тачка остаје написан речима");
+                "Ovo nije dobar znak tačka"),
+                "Ово није добар знак.");
 
         expect(SerbianTransliterator.convert(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
