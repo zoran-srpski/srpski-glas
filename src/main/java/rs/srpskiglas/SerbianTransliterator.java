@@ -56,16 +56,17 @@ public final class SerbianTransliterator {
 
     static String applySpokenPunctuation(String text) {
         Matcher matcher = SPOKEN_PUNCTUATION.matcher(" " + text);
-                 if (matcher.group(1) != null) {
+        StringBuffer out = new StringBuffer();
+        boolean openingSpokenQuote = true;
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
                 matcher.appendReplacement(out,
                         Matcher.quoteReplacement(" " + matcher.group(1)));
                 continue;
             }
             String command = matcher.group(2) != null
                     ? matcher.group(2)
-                    : matcher.group(3);ring command = matcher.group(1) != null
-                    ? matcher.group(1)
-                    : matcher.group(2);
+                    : matcher.group(3);
             command = command.toLowerCase(Locale.ROOT);
             String replacement;
             switch (command) {
