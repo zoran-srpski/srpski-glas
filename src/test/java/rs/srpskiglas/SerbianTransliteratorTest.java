@@ -15,9 +15,9 @@ public final class SerbianTransliteratorTest {
                 "он је надживео свог пријатеља коњ је стајао поред жбуња");
 
         expect(SerbianTransliterator.convert(
-                "Njegoš je rekao znak zarez danas idemo u Niš znak tačka da li je Anđela stigla " +
-                "znak upitnik odjednom se pojavio odžak iznad kuće znak tačka konjukcija i " +
-                "injekcija su neobične reči znak tačka"),
+                "Njegoš je rekao zarez danas idemo u Niš tačka da li je Anđela stigla " +
+                "upitnik odjednom se pojavio odžak iznad kuće tačka konjukcija i " +
+                "injekcija su neobične reči tačka"),
                 "Његош је рекао, данас идемо у Ниш. Да ли је Анђела стигла? " +
                 "Одједном се појавио оџак изнад куће. Конјункција и " +
                 "инјекција су необичне речи.");
@@ -25,6 +25,10 @@ public final class SerbianTransliteratorTest {
         expect(SerbianTransliterator.convert(
                 "Danas dolazim zarez ali kasnim tačka da li čekaš upitnik požuri uzvičnik"),
                 "Данас долазим, али касним. Да ли чекаш? Пожури!");
+
+        expect(SerbianTransliterator.convert(
+                "Izraz znak tačka ostaje napisan rečima"),
+                "Израз знак тачка остаје написан речима");
 
         expect(SerbianTransliterator.convert(
                 "Rekao je navodnik dolazim sutra navodnik tačka zarez zatim je otišao"),
@@ -35,15 +39,15 @@ public final class SerbianTransliteratorTest {
                 "Rekao je „dolazim sutra“; zatim je otišao");
 
         expect(SerbianTransliterator.convert(
-                "Danas su džem i Đak na stolu znak tačka Đak je stigao znak tačka"),
+                "Danas su džem i Đak na stolu tačka Đak je stigao tačka"),
                 "Данас су џем и ђак на столу. Ђак је стигао.");
 
         expect(SerbianTransliterator.convert(
-                "Da li dolaziš znak pitanja"),
+                "Da li dolaziš upitnik"),
                 "Да ли долазиш?");
 
         expect(SerbianTransliterator.convertLatin(
-                "Da li dolaziš znak pitanja"),
+                "Da li dolaziš upitnik"),
                 "Da li dolaziš?");
 
         expect(SerbianTransliterator.convert(
@@ -55,24 +59,24 @@ public final class SerbianTransliteratorTest {
                 "Возим Hyundai и користим Microsoft програме");
 
         expect(SerbianTransliterator.convert(
-                "Naš narod u Republici Srpskoj još uvek češće piše latinicom znak zarez "
-                        + "jer su tako učeni od malih nogu znak tačka"),
+                "Naš narod u Republici Srpskoj još uvek češće piše latinicom zarez "
+                        + "jer su tako učeni od malih nogu tačka"),
                 "Наш народ у Републици Српској још увек чешће пише латиницом, "
                         + "јер су тако учени од малих ногу.");
 
         expect(SerbianTransliterator.convert(
-                "Objašnjenje znak dve tačke znak navodnik prvi znak kosa crta "
-                        + "drugi znak navodnik"),
+                "Objašnjenje dve tačke navodnik prvi kosa crta "
+                        + "drugi navodnik"),
                 "Објашњење: „први/други“");
 
         expect(SerbianTransliterator.convertLatin(
-                "Objašnjenje znak dvotačka znak navodnik prvi znak kosa crta "
-                        + "drugi znak navodnik"),
+                "Objašnjenje dvotačka navodnik prvi kosa crta "
+                        + "drugi navodnik"),
                 "Objašnjenje: „prvi/drugi“");
 
         expect(SerbianTransliterator.convert(
-                "Пример znak otvorena zagrada dodatak znak zatvorena zagrada "
-                        + "znak tačka zarez nastavak"),
+                "Пример otvorena zagrada dodatak zatvorena zagrada "
+                        + "tačka zarez nastavak"),
                 "Пример (додатак); наставак");
 
         expect(SerbianTransliterator.normalizeUnexpectedCapitals(
