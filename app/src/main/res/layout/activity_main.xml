@@ -139,7 +139,12 @@
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="13sp"
+            android:autoSizeMaxTextSize="16sp"
+            android:autoSizeStepGranularity="1sp" />
 
         <TextView
             android:id="@+id/setupCompleteText"

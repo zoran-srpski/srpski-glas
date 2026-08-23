@@ -158,7 +158,7 @@ public final class MainActivity extends Activity {
                 == PackageManager.PERMISSION_GRANTED) {
             step3Status.setText("✓  3. Микрофон је дозвољен на овом уређају");
             microphonePermissionButton.setText(
-                    "Дозвола за микрофон је одобрена");
+                    "Дозвола је одобрена");
             microphonePermissionButton.setBackgroundTintList(
                     ColorStateList.valueOf(0xFFE1E3E2));
             microphonePermissionButton.setTextColor(0xFF52615B);
