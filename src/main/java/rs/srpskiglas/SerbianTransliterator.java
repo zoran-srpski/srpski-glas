@@ -31,6 +31,7 @@ public final class SerbianTransliterator {
             "(?iu)(?:\\s+|^)(?:znak\\s+(tačka\\s+zarez|zarez|tačka|upitnik|"
                     + "pitanja|uzvičnik|dve\\s+tačke|dvotačka|kosa\\s+crta|apostrof|"
                     + "otvorena\\s+zagrada|zatvorena\\s+zagrada)|"
+                    + "(zarez|tačka|upitnik|uzvičnik)|"
                     + "komanda\\s+(novi red))(?=\\s|$)");
 
     public static String convert(String dictatedText) {
@@ -59,8 +60,10 @@ public final class SerbianTransliterator {
         Matcher matcher = SPOKEN_PUNCTUATION.matcher(" " + text);
         StringBuffer out = new StringBuffer();
         while (matcher.find()) {
-            String command = (matcher.group(1) != null ? matcher.group(1) : matcher.group(2))
-                    .toLowerCase(Locale.ROOT);
+            String command = matcher.group(1) != null
+                    ? matcher.group(1)
+                    : (matcher.group(2) != null ? matcher.group(2) : matcher.group(3));
+            command = command.toLowerCase(Locale.ROOT);
             String replacement;
             switch (command) {
                 case "zarez": replacement = ","; break;
