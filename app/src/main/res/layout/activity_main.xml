@@ -39,6 +39,18 @@
             android:textColor="#52615B"
             android:textSize="16sp" />
 
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#E1E3E2"
+            android:text="⚙  Подешавања тастатуре"
+            android:textAllCaps="false"
+            android:textColor="#17221E"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/step1Status"
             android:layout_width="match_parent"
@@ -141,6 +153,54 @@
             android:textColor="#234A3D"
             android:textSize="16sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Кратко упутство"
+            android:textColor="#17221E"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="У било којој апликацији додирните поље за писање. Текст можете уносити ручно или притиснути „Диктирај ћирилицом“. Дугме „Ћир/Lat“ мења писмо, а дугим притиском на ⇄ отвара се избор друге тастатуре."
+            android:textColor="#52615B"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="Гласовне команде"
+            android:textColor="#19785B"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="#FFFFFF"
+            android:lineSpacingExtra="3dp"
+            android:padding="16dp"
+            android:text="тачка → .\nзарез → ,\nзнак питања или упитник → ?\nузвичник → !\nдве тачке или двотачка → :\nтачка зарез → ;\nкоса црта → /\nнаводник → „ “\nотворена заграда / затворена заграда → ( )\nнови ред или нов ред → прелазак у нови ред"
+            android:textColor="#17221E"
+            android:textIsSelectable="true"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#FFF3B0"
+            android:padding="14dp"
+            android:text="Важно: обичне речи остају непромењене. На пример, „ово није добар знак“ остаје текст, док цео израз „знак питања“ уноси ?. После тачке, упитника или узвичника диктирање наставља да слуша и следећу реченицу започиње великим словом."
+            android:textColor="#5A4600"
+            android:textSize="14sp" />
 
         <TextView
             android:layout_width="match_parent"

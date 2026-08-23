@@ -2,22 +2,30 @@ package rs.srpskiglas;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.ViewGroup;
 import android.speech.RecognizerIntent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public final class MainActivity extends Activity {
+    static final String PREFERENCES = "srpski_glas_preferences";
+    static final String PREF_FONT_SIZE = "keyboard_font_size";
+    static final String PREF_THEME = "keyboard_theme";
+    static final String PREF_HAPTIC = "keyboard_haptic";
     private static final int SPEECH_REQUEST = 41;
     private static final int AUDIO_PERMISSION_REQUEST = 42;
     private EditText resultText;
@@ -37,6 +45,7 @@ public final class MainActivity extends Activity {
         Button copy = findViewById(R.id.copyButton);
         Button enableKeyboard = findViewById(R.id.enableKeyboardButton);
         Button selectKeyboard = findViewById(R.id.selectKeyboardButton);
+        Button settings = findViewById(R.id.settingsButton);
 
         enableKeyboard.setOnClickListener(v -> {
             try {
@@ -65,7 +74,82 @@ public final class MainActivity extends Activity {
                 v -> requestAudioPermission(false));
         dictate.setOnClickListener(v -> ensurePermissionAndDictate());
         copy.setOnClickListener(v -> copyResult());
+        settings.setOnClickListener(v -> showSettingsDialog());
         updateMicrophoneStatus();
+    }
+
+    private void showSettingsDialog() {
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        LinearLayout content = new LinearLayout(this);
+        content.setOrientation(LinearLayout.VERTICAL);
+        int padding = dp(20);
+        content.setPadding(padding, dp(8), padding, 0);
+
+        TextView explanation = new TextView(this);
+        explanation.setText("Подешавања се примењују следећи пут када се тастатура прикаже.");
+        explanation.setTextSize(15);
+        explanation.setPadding(0, 0, 0, dp(12));
+        content.addView(explanation);
+
+        addSettingButton(content, "Величина слова", PREF_FONT_SIZE,
+                new String[]{"small", "medium", "large"},
+                new String[]{"Мала", "Средња", "Велика"},
+                preferences.getString(PREF_FONT_SIZE, "medium"));
+        addSettingButton(content, "Тема тастатуре", PREF_THEME,
+                new String[]{"system", "light", "dark"},
+                new String[]{"Према телефону", "Светла", "Тамна"},
+                preferences.getString(PREF_THEME, "system"));
+        addSettingButton(content, "Вибрација тастера", PREF_HAPTIC,
+                new String[]{"off", "weak", "normal"},
+                new String[]{"Искључена", "Слаба", "Нормална"},
+                preferences.getString(PREF_HAPTIC, "weak"));
+
+        new AlertDialog.Builder(this)
+                .setTitle("Подешавања тастатуре")
+                .setView(content)
+                .setPositiveButton("Готово", null)
+                .show();
+    }
+
+    private void addSettingButton(LinearLayout parent, String title, String key,
+            String[] values, String[] labels, String currentValue) {
+        Button button = new Button(this);
+        button.setAllCaps(false);
+        button.setText(title + ": " + labelForValue(values, labels, currentValue));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(54));
+        params.setMargins(0, 0, 0, dp(8));
+        button.setLayoutParams(params);
+        button.setOnClickListener(v -> {
+            int checked = indexOf(values,
+                    getSharedPreferences(PREFERENCES, MODE_PRIVATE)
+                            .getString(key, values[0]));
+            new AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                        getSharedPreferences(PREFERENCES, MODE_PRIVATE)
+                                .edit().putString(key, values[which]).apply();
+                        button.setText(title + ": " + labels[which]);
+                        dialog.dismiss();
+                    })
+                    .show();
+        });
+        parent.addView(button);
+    }
+
+    private int indexOf(String[] values, String value) {
+        for (int i = 0; i < values.length; i++) {
+            if (values[i].equals(value)) return i;
+        }
+        return 0;
+    }
+
+    private String labelForValue(String[] values, String[] labels, String value) {
+        return labels[indexOf(values, value)];
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     private void updateMicrophoneStatus() {

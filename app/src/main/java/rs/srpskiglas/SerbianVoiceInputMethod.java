@@ -2,7 +2,9 @@ package rs.srpskiglas;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -53,6 +55,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private Button enterButton;
     private Button openKeyboardButton;
     private Button spaceButton;
+    private LinearLayout keyboardRoot;
     private LinearLayout letterRows;
     private LinearLayout keyboardBody;
     private LinearLayout topControlRow;
@@ -76,6 +79,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private long initialSpeechDeadline;
     private long suppressKeyboardAutoOpenUntil;
     private long keyboardHiddenAt = -1L;
+    private float letterTextSize = 20f;
+    private boolean darkKeyboard;
+    private String hapticStrength = "weak";
     private final Runnable restoreSwitchKeyboardButton = () -> {
         if (switchKeyboardButton == null) return;
         switchKeyboardButton.setText("⇄");
@@ -121,6 +127,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     @Override public View onCreateInputView() {
         applyLightNavigationBar();
         View view = getLayoutInflater().inflate(R.layout.keyboard_voice, null);
+        keyboardRoot = view.findViewById(R.id.keyboardRoot);
+        loadKeyboardPreferences();
         final int left = view.getPaddingLeft();
         final int top = view.getPaddingTop();
         final int right = view.getPaddingRight();
@@ -219,6 +227,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         setKeyboardExpanded(true);
         updateKeyboardControlLabels();
         buildLetterRows();
+        applyKeyboardTheme();
         updateEditorAction(getCurrentInputEditorInfo());
         handler.post(this::updateAutomaticShift);
         return view;
@@ -226,6 +235,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
+        loadKeyboardPreferences();
+        buildLetterRows();
+        applyKeyboardTheme();
         applyLightNavigationBar();
         restoreMicButtonLayout();
         if (micButton != null && !continuousMode && !listening) {
@@ -337,6 +349,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         letterRows.removeAllViews();
         if (emojiMode) {
             buildEmojiRows();
+            applyKeyboardTheme();
             return;
         }
         String[] rows = symbolMode
@@ -359,7 +372,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
                 keyButton.setMinWidth(0);
                 keyButton.setPadding(0, 0, 0, 0);
                 keyButton.setText(key);
-                keyButton.setTextSize(20);
+                keyButton.setTextSize(letterTextSize);
                 keyButton.setAllCaps(false);
                 final String value = key;
                 keyButton.setOnClickListener(v -> typeLetter(value));
@@ -368,6 +381,78 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             letterRows.addView(row, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, dp(42)));
         }
+        applyKeyboardTheme();
+    }
+
+    private void loadKeyboardPreferences() {
+        SharedPreferences preferences = getSharedPreferences(
+                MainActivity.PREFERENCES, MODE_PRIVATE);
+        String fontSize = preferences.getString(
+                MainActivity.PREF_FONT_SIZE, "medium");
+        switch (fontSize) {
+            case "small": letterTextSize = 17f; break;
+            case "large": letterTextSize = 23f; break;
+            default: letterTextSize = 20f;
+        }
+        String theme = preferences.getString(MainActivity.PREF_THEME, "system");
+        if ("dark".equals(theme)) {
+            darkKeyboard = true;
+        } else if ("light".equals(theme)) {
+            darkKeyboard = false;
+        } else {
+            int nightMode = getResources().getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_MASK;
+            darkKeyboard = nightMode == Configuration.UI_MODE_NIGHT_YES;
+        }
+        hapticStrength = preferences.getString(MainActivity.PREF_HAPTIC, "weak");
+    }
+
+    private void applyKeyboardTheme() {
+        if (keyboardRoot == null) return;
+        keyboardRoot.setBackgroundColor(darkKeyboard ? 0xFF1E211F : 0xFFF6F4EE);
+        tintKeyboardChildren(keyboardRoot);
+        if (micButton != null) {
+            micButton.setBackgroundTintList(ColorStateList.valueOf(0xFF19785B));
+            micButton.setTextColor(Color.WHITE);
+        }
+        if (scriptButton != null) {
+            scriptButton.setBackgroundTintList(ColorStateList.valueOf(0xFF1976D2));
+            scriptButton.setTextColor(Color.WHITE);
+        }
+        if (openKeyboardButton != null) {
+            openKeyboardButton.setBackgroundTintList(ColorStateList.valueOf(
+                    darkKeyboard ? 0xFF665719 : 0xFFFFF3B0));
+            openKeyboardButton.setTextColor(darkKeyboard ? 0xFFFFF3B0 : 0xFF5A4600);
+        }
+    }
+
+    private void tintKeyboardChildren(View view) {
+        if (view instanceof Button) {
+            Button button = (Button) view;
+            int id = button.getId();
+            if (id != R.id.keyboardMicButton
+                    && id != R.id.scriptButton
+                    && id != R.id.openKeyboardButton) {
+                button.setBackgroundTintList(ColorStateList.valueOf(
+                        darkKeyboard ? 0xFF3B403D : 0xFFE1E3E2));
+                button.setTextColor(darkKeyboard ? Color.WHITE : 0xFF272B29);
+            }
+            return;
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                tintKeyboardChildren(group.getChildAt(i));
+            }
+        }
+    }
+
+    private void performTypingHaptic() {
+        if (keyboardRoot == null || "off".equals(hapticStrength)) return;
+        int feedback = "normal".equals(hapticStrength)
+                ? HapticFeedbackConstants.KEYBOARD_TAP
+                : HapticFeedbackConstants.TEXT_HANDLE_MOVE;
+        keyboardRoot.performHapticFeedback(feedback);
     }
 
     private void buildEmojiRows() {
@@ -556,6 +641,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         stopDictationForManualInput();
         InputConnection connection = getCurrentInputConnection();
         if (connection == null) return;
+        performTypingHaptic();
         if (isClosingPunctuation(value) && !lastSpaceAddedManually) {
             removeWhitespaceBeforeCursor(connection);
         }
