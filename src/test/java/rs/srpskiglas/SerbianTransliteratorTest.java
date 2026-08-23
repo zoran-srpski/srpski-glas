@@ -34,6 +34,10 @@ public final class SerbianTransliteratorTest {
                 "Prvi red novi red drugi red"),
                 "Први ред\nДруги ред");
 
+        expect(SerbianTransliterator.convert(
+                "Prvi red nov red drugi red"),
+                "Први ред\nДруги ред");
+
         expect(SerbianTransliterator.convertLatin(
                 "Prvi red komanda novi red drugi red"),
                 "Prvi red komanda\nDrugi red");
