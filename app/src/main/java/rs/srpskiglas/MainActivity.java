@@ -32,6 +32,7 @@ public final class MainActivity extends Activity {
     private TextView step3Status;
     private Button microphonePermissionButton;
     private boolean startDictationAfterPermission;
+    private boolean showingHelp;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -89,6 +90,7 @@ public final class MainActivity extends Activity {
     }
 
     private void showSettingsScreen() {
+        showingHelp = false;
         setContentView(R.layout.activity_settings);
         SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
         configureSettingButton(findViewById(R.id.settingsFontButton),
@@ -106,7 +108,24 @@ public final class MainActivity extends Activity {
                 new String[]{"off", "weak", "normal"},
                 new String[]{"Искључена", "Слаба", "Нормална"},
                 preferences.getString(PREF_HAPTIC, "weak"));
+        findViewById(R.id.settingsHelpButton).setOnClickListener(
+                v -> showHelpScreen());
         findViewById(R.id.settingsDoneButton).setOnClickListener(v -> finish());
+    }
+
+    private void showHelpScreen() {
+        showingHelp = true;
+        setContentView(R.layout.activity_help);
+        findViewById(R.id.helpBackButton).setOnClickListener(
+                v -> showSettingsScreen());
+    }
+
+    @Override public void onBackPressed() {
+        if (showingHelp) {
+            showSettingsScreen();
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void configureSettingButton(Button button, String title, String key,

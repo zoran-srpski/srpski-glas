@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F6F4EE">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Упутство"
+            android:textColor="#17221E"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="У било којој апликацији додирните поље за писање. Текст можете уносити ручно или притиснути „Диктирај“. Дугме „Ћир/Lat“ мења писмо, дугим притиском на ⇄ отвара се избор друге тастатуре, а тастер ⋮ отвара подешавања."
+            android:textColor="#52615B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="Гласовне команде"
+            android:textColor="#19785B"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="#FFFFFF"
+            android:lineSpacingExtra="3dp"
+            android:padding="16dp"
+            android:text="тачка → .\nзарез → ,\nзнак питања или упитник → ?\nузвичник → !\nдве тачке или двотачка → :\nтачка зарез → ;\nкоса црта → /\nнаводник → „ “\nотворена заграда / затворена заграда → ( )\nнови ред или нов ред → прелазак у нови ред"
+            android:textColor="#17221E"
+            android:textIsSelectable="true"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="#FFF3B0"
+            android:padding="14dp"
+            android:text="Важно: обичне речи остају непромењене. На пример, „ово није добар знак“ остаје текст, док цео израз „знак питања“ уноси ?. После тачке, упитника или узвичника диктирање наставља да слуша и следећу реченицу започиње великим словом."
+            android:textColor="#5A4600"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/helpBackButton"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#19785B"
+            android:text="Назад на подешавања"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</ScrollView>
