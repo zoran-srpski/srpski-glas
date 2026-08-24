@@ -284,7 +284,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         if (resetLetters) symbolMode = false;
         if (resetEmoji) emojiMode = false;
         shifted = capsLock;
-        if (scriptButton != null) scriptButton.setText("Ћир/Lat");
+        updateScriptButtonLabel();
         if (symbolsButton != null) symbolsButton.setText("123/#+=");
         if (emojiButton != null) emojiButton.setText("😀");
         if (shiftButton != null) {
@@ -524,7 +524,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         latinScript = !latinScript;
         symbolMode = false;
         emojiMode = false;
-        scriptButton.setText("Ћир/Lat");
+        updateScriptButtonLabel();
         symbolsButton.setText("123/#+=");
         emojiButton.setText("😀");
         shiftButton.setEnabled(true);
@@ -553,7 +553,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         latinScript = false;
         symbolMode = false;
         emojiMode = false;
-        if (scriptButton != null) scriptButton.setText("Ћир/Lat");
+        updateScriptButtonLabel();
         if (symbolsButton != null) symbolsButton.setText("123/#+=");
         if (emojiButton != null) emojiButton.setText("😀");
         if (shiftButton != null) shiftButton.setEnabled(true);
@@ -579,6 +579,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void updateKeyboardControlLabels() {
+        updateScriptButtonLabel();
         if (openKeyboardButton != null) {
             openKeyboardButton.setText(latinScript
                     ? "Otvori tastaturu"
@@ -586,6 +587,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
         }
         if (spaceButton != null) {
             spaceButton.setText(latinScript ? "RAZMAK" : "РАЗМАК");
+        }
+    }
+
+    private void updateScriptButtonLabel() {
+        if (scriptButton != null) {
+            scriptButton.setText(latinScript ? "Lat/Ћир" : "Ћир/Lat");
         }
     }
 
