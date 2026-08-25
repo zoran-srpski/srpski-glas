@@ -63,6 +63,7 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private final Handler keyHandler = new Handler(Looper.getMainLooper());
     private boolean continuousMode;
     private boolean listening;
+    private boolean manualStopPending;
     private boolean latinScript;
     private boolean shifted;
     private boolean capsLock;
@@ -94,6 +95,9 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             deleteOneCharacter();
             keyHandler.postDelayed(this, 65);
         }
+    };
+    private final Runnable forceManualStop = () -> {
+        if (manualStopPending) completeVoiceInputStop();
     };
 
     private static final String[] CYRILLIC_ROWS = {
@@ -762,9 +766,10 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     private void toggleVoiceInput() {
         restoreMicButtonLayout();
         if (continuousMode) {
-            stopVoiceInput();
+            requestVoiceInputStop();
         } else {
             continuousMode = true;
+            manualStopPending = false;
             dictationContextKnown = false;
             speechStarted = false;
             startSilenceRetries = 0;
@@ -846,13 +851,38 @@ public final class SerbianVoiceInputMethod extends InputMethodService
     }
 
     private void stopVoiceInput() {
+        manualStopPending = false;
         continuousMode = false;
         listening = false;
         setKeepScreenOnWhileDictating(false);
-        handler.removeCallbacksAndMessages(null);
+        handler.removeCallbacks(forceManualStop);
         if (recognizer != null) recognizer.cancel();
         if (micButton != null) micButton.setText(dictationButtonLabel());
         showStatus("Заустављено — спреман");
+    }
+
+    private void requestVoiceInputStop() {
+        if (!continuousMode && !listening) return;
+        manualStopPending = true;
+        handler.removeCallbacks(forceManualStop);
+        if (micButton != null) {
+            micButton.setText(latinScript ? "⏳  Obrađujem" : "⏳  Обрађујем");
+        }
+        if (recognizer != null && listening) {
+            recognizer.stopListening();
+            handler.postDelayed(forceManualStop, 3000L);
+        } else {
+            completeVoiceInputStop();
+        }
+    }
+
+    private void completeVoiceInputStop() {
+        handler.removeCallbacks(forceManualStop);
+        manualStopPending = false;
+        continuousMode = false;
+        listening = false;
+        setKeepScreenOnWhileDictating(false);
+        if (micButton != null) micButton.setText(dictationButtonLabel());
     }
 
     private void continueListening() {
@@ -945,16 +975,12 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onResults(Bundle results) {
         if (!continuousMode) return;
+        listening = false;
         ArrayList<String> matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION);
         if (matches == null || matches.isEmpty()) {
-            if (continuousMode
-                    && SystemClock.uptimeMillis() < initialSpeechDeadline) {
-                listening = false;
-                handler.postDelayed(this::startVoiceInput, 120);
-                return;
-            }
-            finishDictationAfterPause();
+            if (manualStopPending) completeVoiceInputStop();
+            else handler.postDelayed(this::startVoiceInput, 120);
             return;
         }
         String converted = latinScript
@@ -986,14 +1012,8 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             lastSpaceAddedByDictation = addTrailingSpace;
             lastSpaceAddedManually = false;
         }
-        if (endsWithSentencePunctuation(converted)) {
-            // A spoken full stop, question mark or exclamation mark finishes
-            // only the sentence, not the dictation session. Start a fresh
-            // recognizer cycle so the user can continue with the next sentence.
-            continueListening();
-        } else {
-            finishDictationAfterPause();
-        }
+        if (manualStopPending) completeVoiceInputStop();
+        else continueListening();
         // Refresh Shift so the next manually typed letter starts in uppercase
         // immediately after sentence punctuation, even when the editor delays
         // selection updates.
@@ -1065,12 +1085,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
 
     @Override public void onError(int error) {
         listening = false;
-        if ((error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
-                || error == SpeechRecognizer.ERROR_NO_MATCH)
-                && continuousMode
-                && SystemClock.uptimeMillis() < initialSpeechDeadline) {
+        if (manualStopPending) {
+            completeVoiceInputStop();
+            return;
+        }
+        if (continuousMode && isRecoverableRecognitionError(error)) {
             startSilenceRetries++;
-            handler.postDelayed(this::startVoiceInput, 120);
+            handler.postDelayed(this::startVoiceInput, 200);
             return;
         }
         if (continuousMode) {
@@ -1079,6 +1100,13 @@ public final class SerbianVoiceInputMethod extends InputMethodService
             finishListening("Заустављено");
         }
         showRecognitionError(error);
+    }
+
+    private boolean isRecoverableRecognitionError(int error) {
+        return error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT
+                || error == SpeechRecognizer.ERROR_NO_MATCH
+                || error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY
+                || error == SpeechRecognizer.ERROR_SERVER_DISCONNECTED;
     }
 
     private void showRecognitionError(int error) {
