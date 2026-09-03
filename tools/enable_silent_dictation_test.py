@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Third silent-dictation test. This marker change intentionally triggers a fresh CI build.
 p = Path("app/src/main/java/rs/srpskiglas/SerbianVoiceInputMethod.java")
 s = p.read_text(encoding="utf-8")
 
