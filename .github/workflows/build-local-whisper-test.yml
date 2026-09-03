@@ -1,0 +1,58 @@
+name: Build Local Whisper Test APK
+
+on:
+  push:
+    branches: [ test/local-whisper ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Download sherpa-onnx Android AAR
+        run: |
+          mkdir -p app/libs
+          curl -L --fail --retry 3 \
+            -o app/libs/sherpa-onnx-1.13.4.aar \
+            https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.4/sherpa-onnx-1.13.4.aar
+          ls -lh app/libs/sherpa-onnx-1.13.4.aar
+
+      - name: Download multilingual Whisper tiny int8 model
+        run: |
+          curl -L --fail --retry 3 \
+            -o /tmp/whisper.tar.bz2 \
+            https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-tiny.tar.bz2
+          mkdir -p app/src/main/assets
+          tar xjf /tmp/whisper.tar.bz2 -C app/src/main/assets
+          rm /tmp/whisper.tar.bz2
+          find app/src/main/assets/sherpa-onnx-whisper-tiny -maxdepth 1 -type f -printf '%f %k KB\n' | sort
+
+      - name: Apply local Whisper keyboard patch
+        run: python3 tools/enable_local_whisper_test.py
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Show APK
+        run: ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload ninth test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: srpski-glas-local-whisper-test-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          compression-level: 0
+          retention-days: 30
