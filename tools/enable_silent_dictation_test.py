@@ -1,7 +1,8 @@
 from pathlib import Path
 
-# Seventh test: app owns AudioRecord and feeds PCM to SpeechRecognizer via EXTRA_AUDIO_SOURCE.
-# Goal: test whether bypassing recognizer-owned microphone removes system start/stop beeps.
+# Eighth test: keep the silent AudioRecord -> EXTRA_AUDIO_SOURCE path, but fix pipe lifecycle.
+# Start SpeechRecognizer before pumping PCM, duplicate the read descriptor for the recognizer,
+# and let EOF (not stopListening) finish recognition after five seconds of silence.
 p = Path("app/src/main/java/rs/srpskiglas/SerbianVoiceInputMethod.java")
 s = p.read_text(encoding="utf-8")
 
@@ -29,12 +30,11 @@ new_fields = """    private SpeechRecognizer recognizer;
     private boolean appSilenceStopPending;
     private static final long APP_SILENCE_TIMEOUT_MS = 5000L;
     private static final int DICTATION_SAMPLE_RATE = 16000;
-    private static final double VOICE_RMS_AMPLITUDE = 450.0;
+    private static final double VOICE_RMS_AMPLITUDE = 300.0;
     private Button micButton;"""
 if old_fields not in s: raise SystemExit("Recognizer field block not found")
 s = s.replace(old_fields, new_fields, 1)
 
-# Insert audio-pipe helpers before network helper.
 marker = "    private boolean isInternetAvailable() {"
 helpers = """    private boolean prepareDictationAudioSource(Intent intent) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false;
@@ -53,25 +53,37 @@ helpers = """    private boolean prepareDictationAudioSource(Intent intent) {
             ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             dictationAudioRead = pipe[0];
             dictationAudioWrite = pipe[1];
-            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, dictationAudioRead);
+            ParcelFileDescriptor recognizerRead = ParcelFileDescriptor.dup(
+                    dictationAudioRead.getFileDescriptor());
+            intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, recognizerRead);
             intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1);
             intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING,
                     AudioFormat.ENCODING_PCM_16BIT);
             intent.putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE,
                     DICTATION_SAMPLE_RATE);
-            dictationAudioRunning = true;
             speechStarted = false;
             lastVoiceActivityAt = SystemClock.uptimeMillis();
             appSilenceStopPending = false;
-            dictationAudioRecord.startRecording();
-            final AudioRecord record = dictationAudioRecord;
-            final ParcelFileDescriptor writeSide = dictationAudioWrite;
-            dictationAudioThread = new Thread(() -> pumpDictationAudio(record, writeSide),
-                    "SrpskiGlasAudioPipe");
-            dictationAudioThread.start();
             return true;
         } catch (Exception e) {
             stopDictationAudioSource();
+            return false;
+        }
+    }
+
+    private boolean startDictationAudioPump() {
+        AudioRecord record = dictationAudioRecord;
+        ParcelFileDescriptor writeSide = dictationAudioWrite;
+        if (record == null || writeSide == null) return false;
+        try {
+            dictationAudioRunning = true;
+            record.startRecording();
+            dictationAudioThread = new Thread(() -> pumpDictationAudio(record, writeSide),
+                    \"SrpskiGlasAudioPipe\");
+            dictationAudioThread.start();
+            return true;
+        } catch (Exception e) {
+            dictationAudioRunning = false;
             return false;
         }
     }
@@ -96,20 +108,27 @@ helpers = """    private boolean prepareDictationAudioSource(Intent intent) {
                 if (rms >= VOICE_RMS_AMPLITUDE) {
                     speechStarted = true;
                     lastVoiceActivityAt = now;
-                } else if (speechStarted && now - lastVoiceActivityAt >= APP_SILENCE_TIMEOUT_MS) {
+                }
+                out.write(pcm, 0, count * 2);
+                out.flush();
+                if (speechStarted && now - lastVoiceActivityAt >= APP_SILENCE_TIMEOUT_MS) {
                     appSilenceStopPending = true;
                     dictationAudioRunning = false;
                 }
-                out.write(pcm, 0, count * 2);
             }
         } catch (IOException ignored) {
         } finally {
             try { record.stop(); } catch (Exception ignored) {}
             try { writeSide.close(); } catch (IOException ignored) {}
+            dictationAudioWrite = null;
             handler.post(() -> {
                 if (appSilenceStopPending && continuousMode) {
-                    listening = false;
                     showStatus(\"Обрађујем…\");
+                    handler.postDelayed(() -> {
+                        if (continuousMode && listening && appSilenceStopPending) {
+                            recognizer.stopListening();
+                        }
+                    }, 2500L);
                 }
             });
         }
@@ -155,7 +174,16 @@ new_start = """        showStatus(\"Слушам…\");
             showStatus(\"Аудио извор није доступан\");
             return;
         }
-        recognizer.startListening(intent);"""
+        recognizer.startListening(intent);
+        if (!startDictationAudioPump()) {
+            recognizer.cancel();
+            stopDictationAudioSource();
+            listening = false;
+            continuousMode = false;
+            setKeepScreenOnWhileDictating(false);
+            micButton.setText(dictationButtonLabel());
+            showStatus(\"Аудио ток није покренут\");
+        }"""
 if old_start not in s: raise SystemExit("startListening block not found")
 s = s.replace(old_start, new_start, 1)
 
@@ -177,6 +205,9 @@ old_manual = """        if (recognizer != null && listening) {
 new_manual = """        if (recognizer != null && listening) {
             appSilenceStopPending = true;
             dictationAudioRunning = false;
+            handler.postDelayed(() -> {
+                if (manualStopPending && listening) recognizer.stopListening();
+            }, 600L);
             handler.postDelayed(forceManualStop, 3000L);"""
 if old_manual not in s: raise SystemExit("manual stop block not found")
 s = s.replace(old_manual, new_manual, 1)
@@ -240,4 +271,4 @@ if old_recover not in s: raise SystemExit("recoverable error block not found")
 s = s.replace(old_recover, new_recover, 1)
 
 p.write_text(s, encoding="utf-8")
-print("Seventh test: app AudioRecord -> SpeechRecognizer EXTRA_AUDIO_SOURCE pipe applied")
+print("Eighth test: silent external audio source with corrected pipe lifecycle applied")
