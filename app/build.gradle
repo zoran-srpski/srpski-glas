@@ -1,4 +1,7 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     namespace 'rs.srpskiglas'
@@ -18,7 +21,7 @@ android {
         minSdk 26
         targetSdk 35
         versionCode 97
-        versionName '0.10.41'
+        versionName '0.10.41-whisper-test'
     }
 
     buildTypes {
@@ -28,4 +31,8 @@ android {
     sourceSets {
         main.java.srcDirs += '../src/main/java'
     }
+}
+
+dependencies {
+    implementation files('libs/sherpa-onnx-1.13.4.aar')
 }
