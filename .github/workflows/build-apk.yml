@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, test/local-whisper ]
+    branches: [ main, test/local-whisper, test/start-beep-only ]
   workflow_dispatch:
 
 permissions:
@@ -20,6 +20,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
+      - name: Apply start-beep-only test patch
+        if: github.ref == 'refs/heads/test/start-beep-only'
+        run: python3 tools/enable_start_beep_only_test.py
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
