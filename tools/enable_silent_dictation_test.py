@@ -22,7 +22,6 @@ if old_fields not in s:
     raise SystemExit("Recognizer field block not found")
 s = s.replace(old_fields, new_fields, 1)
 
-# Keep the first start tone suppressed, but do not repeatedly mute/unmute because there is no auto restart.
 old_start = """        showStatus(\"Слушам…\");
         speechStarted = false;
         listening = true;
@@ -42,9 +41,7 @@ s = s.replace(old_start, new_start, 1)
 marker = """    private boolean isInternetAvailable() {"""
 helpers = """    private void muteRecognitionBeepStreams() {
         if (recognitionAudioMuted) return;
-        if (audioManager == null) {
-            audioManager = getSystemService(AudioManager.class);
-        }
+        if (audioManager == null) audioManager = getSystemService(AudioManager.class);
         if (audioManager == null || audioManager.isVolumeFixed()) return;
         try {
             savedMusicVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -60,12 +57,8 @@ helpers = """    private void muteRecognitionBeepStreams() {
     private void restoreRecognitionBeepStreams() {
         if (!recognitionAudioMuted || audioManager == null) return;
         try {
-            if (savedMusicVolume >= 0) {
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, savedMusicVolume, 0);
-            }
-            if (savedNotificationVolume >= 0) {
-                audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, savedNotificationVolume, 0);
-            }
+            if (savedMusicVolume >= 0) audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, savedMusicVolume, 0);
+            if (savedNotificationVolume >= 0) audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, savedNotificationVolume, 0);
         } catch (RuntimeException ignored) {
         } finally {
             recognitionAudioMuted = false;
@@ -79,7 +72,6 @@ if marker not in s:
     raise SystemExit("Internet helper marker not found")
 s = s.replace(marker, helpers, 1)
 
-# A recognizer result now ends dictation instead of starting another SpeechRecognizer session.
 old_continue = """    private void continueListening() {
         listening = false;
         if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
@@ -95,7 +87,7 @@ if old_continue not in s:
     raise SystemExit("continueListening block not found")
 s = s.replace(old_continue, new_continue, 1)
 
-# Recoverable timeout/no-match errors also stop instead of silently creating another session.
+# Stop recoverable timeout/no-match sessions instead of starting a fresh recognizer session.
 old_recover = """        if (continuousMode && isRecoverableRecognitionError(error)) {
             startSilenceRetries++;
             handler.postDelayed(this::startVoiceInput, 200);
@@ -103,17 +95,28 @@ old_recover = """        if (continuousMode && isRecoverableRecognitionError(err
         }"""
 new_recover = """        if (continuousMode && isRecoverableRecognitionError(error)) {
             startSilenceRetries++;
-            continuousMode = false;
-            setKeepScreenOnWhileDictating(false);
-            if (micButton != null) micButton.setText(dictationButtonLabel());
-            showStatus(\"Заустављено — спреман\");
+            finishDictationAfterPause();
             return;
         }"""
 if old_recover not in s:
     raise SystemExit("recoverable error restart block not found")
 s = s.replace(old_recover, new_recover, 1)
 
-# Manual stop remains silent and still lets the recognizer return captured text.
+# If recognition finishes with no matches, stop instead of starting another session.
+old_empty = """        if (matches == null || matches.isEmpty()) {
+            if (manualStopPending) completeVoiceInputStop();
+            else handler.postDelayed(this::startVoiceInput, 120);
+            return;
+        }"""
+new_empty = """        if (matches == null || matches.isEmpty()) {
+            if (manualStopPending) completeVoiceInputStop();
+            else finishDictationAfterPause();
+            return;
+        }"""
+if old_empty not in s:
+    raise SystemExit("empty results restart block not found")
+s = s.replace(old_empty, new_empty, 1)
+
 old_stop = """        if (recognizer != null && listening) {
             recognizer.stopListening();
             handler.postDelayed(forceManualStop, 3000L);"""
