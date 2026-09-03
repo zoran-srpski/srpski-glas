@@ -1,8 +1,8 @@
-name: Build Android APK
+name: Build Silent Dictation Test APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ test/silent-dictation ]
   workflow_dispatch:
 
 permissions:
@@ -14,6 +14,34 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Enable on-device speech recognizer for test build
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('app/src/main/java/rs/srpskiglas/SerbianVoiceInputMethod.java')
+          s = p.read_text(encoding='utf-8')
+          old = '''        if (recognizer == null) {
+            recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            recognizer.setRecognitionListener(this);
+        } else {
+            recognizer.cancel();
+        }'''
+          new = '''        if (recognizer == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    && SpeechRecognizer.isOnDeviceRecognitionAvailable(this)) {
+                recognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(this);
+            } else {
+                recognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            }
+            recognizer.setRecognitionListener(this);
+        } else {
+            recognizer.cancel();
+        }'''
+          if old not in s:
+              raise SystemExit('Expected SpeechRecognizer block not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -32,6 +60,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: srpski-glas-debug-apk
+          name: srpski-glas-silent-dictation-test-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
