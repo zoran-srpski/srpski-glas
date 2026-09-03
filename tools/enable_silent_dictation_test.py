@@ -1,6 +1,6 @@
 from pathlib import Path
 
-# Third silent-dictation test. This marker change intentionally triggers a fresh CI build.
+# Fourth silent-dictation test: stop after a long pause instead of auto-restarting.
 p = Path("app/src/main/java/rs/srpskiglas/SerbianVoiceInputMethod.java")
 s = p.read_text(encoding="utf-8")
 
@@ -22,6 +22,7 @@ if old_fields not in s:
     raise SystemExit("Recognizer field block not found")
 s = s.replace(old_fields, new_fields, 1)
 
+# Keep the first start tone suppressed, but do not repeatedly mute/unmute because there is no auto restart.
 old_start = """        showStatus(\"Слушам…\");
         speechStarted = false;
         listening = true;
@@ -78,23 +79,41 @@ if marker not in s:
     raise SystemExit("Internet helper marker not found")
 s = s.replace(marker, helpers, 1)
 
+# A recognizer result now ends dictation instead of starting another SpeechRecognizer session.
 old_continue = """    private void continueListening() {
         listening = false;
         if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
     }"""
 new_continue = """    private void continueListening() {
         listening = false;
-        if (continuousMode) {
-            // Keep the recognizer's end-of-session and immediate restart tones silent.
-            muteRecognitionBeepStreams();
-            handler.postDelayed(this::startVoiceInput, 100);
-            handler.postDelayed(this::restoreRecognitionBeepStreams, 1200L);
-        }
+        continuousMode = false;
+        setKeepScreenOnWhileDictating(false);
+        if (micButton != null) micButton.setText(dictationButtonLabel());
+        showStatus(\"Заустављено — спреман\");
     }"""
 if old_continue not in s:
     raise SystemExit("continueListening block not found")
 s = s.replace(old_continue, new_continue, 1)
 
+# Recoverable timeout/no-match errors also stop instead of silently creating another session.
+old_recover = """    if (continuousMode && isRecoverableRecognitionError(error)) {
+        startSilenceRetries++;
+        handler.postDelayed(this::startVoiceInput, 200);
+        return;
+    }"""
+new_recover = """    if (continuousMode && isRecoverableRecognitionError(error)) {
+        startSilenceRetries++;
+        continuousMode = false;
+        setKeepScreenOnWhileDictating(false);
+        if (micButton != null) micButton.setText(dictationButtonLabel());
+        showStatus(\"Заустављено — спреман\");
+        return;
+    }"""
+if old_recover not in s:
+    raise SystemExit("recoverable error restart block not found")
+s = s.replace(old_recover, new_recover, 1)
+
+# Manual stop remains silent and still lets the recognizer return captured text.
 old_stop = """        if (recognizer != null && listening) {
             recognizer.stopListening();
             handler.postDelayed(forceManualStop, 3000L);"""
@@ -119,4 +138,4 @@ if "android.permission.MODIFY_AUDIO_SETTINGS" not in m:
     m = m.replace(anchor, anchor + permission, 1)
 manifest.write_text(m, encoding="utf-8")
 
-print("Transition-focused beep suppression test patch applied")
+print("Fourth test: stop-after-pause dictation patch applied")
