@@ -32,7 +32,7 @@ new_start = """        showStatus(\"Слушам…\");
         setKeepScreenOnWhileDictating(true);
         muteRecognitionBeepStreams();
         recognizer.startListening(intent);
-        handler.postDelayed(this::restoreRecognitionBeepStreams, 450L);"""
+        handler.postDelayed(this::restoreRecognitionBeepStreams, 900L);"""
 if old_start not in s:
     raise SystemExit("startListening block not found")
 s = s.replace(old_start, new_start, 1)
@@ -77,13 +77,30 @@ if marker not in s:
     raise SystemExit("Internet helper marker not found")
 s = s.replace(marker, helpers, 1)
 
+old_continue = """    private void continueListening() {
+        listening = false;
+        if (continuousMode) handler.postDelayed(this::startVoiceInput, 100);
+    }"""
+new_continue = """    private void continueListening() {
+        listening = false;
+        if (continuousMode) {
+            // Keep the recognizer's end-of-session and immediate restart tones silent.
+            muteRecognitionBeepStreams();
+            handler.postDelayed(this::startVoiceInput, 100);
+            handler.postDelayed(this::restoreRecognitionBeepStreams, 1200L);
+        }
+    }"""
+if old_continue not in s:
+    raise SystemExit("continueListening block not found")
+s = s.replace(old_continue, new_continue, 1)
+
 old_stop = """        if (recognizer != null && listening) {
             recognizer.stopListening();
             handler.postDelayed(forceManualStop, 3000L);"""
 new_stop = """        if (recognizer != null && listening) {
             muteRecognitionBeepStreams();
             recognizer.stopListening();
-            handler.postDelayed(this::restoreRecognitionBeepStreams, 650L);
+            handler.postDelayed(this::restoreRecognitionBeepStreams, 1100L);
             handler.postDelayed(forceManualStop, 3000L);"""
 if old_stop not in s:
     raise SystemExit("manual stop block not found")
@@ -101,4 +118,4 @@ if "android.permission.MODIFY_AUDIO_SETTINGS" not in m:
     m = m.replace(anchor, anchor + permission, 1)
 manifest.write_text(m, encoding="utf-8")
 
-print("Temporary beep suppression test patch applied")
+print("Transition-focused beep suppression test patch applied")
