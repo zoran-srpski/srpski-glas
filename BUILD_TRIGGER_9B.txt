@@ -1,0 +1,1 @@
+Trigger local Whisper build after enabling the main workflow for test/local-whisper.
