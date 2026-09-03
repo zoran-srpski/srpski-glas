@@ -96,19 +96,19 @@ if old_continue not in s:
 s = s.replace(old_continue, new_continue, 1)
 
 # Recoverable timeout/no-match errors also stop instead of silently creating another session.
-old_recover = """    if (continuousMode && isRecoverableRecognitionError(error)) {
-        startSilenceRetries++;
-        handler.postDelayed(this::startVoiceInput, 200);
-        return;
-    }"""
-new_recover = """    if (continuousMode && isRecoverableRecognitionError(error)) {
-        startSilenceRetries++;
-        continuousMode = false;
-        setKeepScreenOnWhileDictating(false);
-        if (micButton != null) micButton.setText(dictationButtonLabel());
-        showStatus(\"Заустављено — спреман\");
-        return;
-    }"""
+old_recover = """        if (continuousMode && isRecoverableRecognitionError(error)) {
+            startSilenceRetries++;
+            handler.postDelayed(this::startVoiceInput, 200);
+            return;
+        }"""
+new_recover = """        if (continuousMode && isRecoverableRecognitionError(error)) {
+            startSilenceRetries++;
+            continuousMode = false;
+            setKeepScreenOnWhileDictating(false);
+            if (micButton != null) micButton.setText(dictationButtonLabel());
+            showStatus(\"Заустављено — спреман\");
+            return;
+        }"""
 if old_recover not in s:
     raise SystemExit("recoverable error restart block not found")
 s = s.replace(old_recover, new_recover, 1)
