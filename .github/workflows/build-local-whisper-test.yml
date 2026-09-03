@@ -25,7 +25,7 @@ jobs:
             https://github.com/k2-fsa/sherpa-onnx/releases/download/v1.13.4/sherpa-onnx-1.13.4.aar
           ls -lh app/libs/sherpa-onnx-1.13.4.aar
 
-      - name: Download multilingual Whisper tiny int8 model
+      - name: Download and trim multilingual Whisper tiny int8 model
         run: |
           curl -L --fail --retry 3 \
             -o /tmp/whisper.tar.bz2 \
@@ -33,10 +33,29 @@ jobs:
           mkdir -p app/src/main/assets
           tar xjf /tmp/whisper.tar.bz2 -C app/src/main/assets
           rm /tmp/whisper.tar.bz2
-          find app/src/main/assets/sherpa-onnx-whisper-tiny -maxdepth 1 -type f -printf '%f %k KB\n' | sort
+          cd app/src/main/assets/sherpa-onnx-whisper-tiny
+          find . -maxdepth 1 -type f \
+            ! -name 'tiny-encoder.int8.onnx' \
+            ! -name 'tiny-decoder.int8.onnx' \
+            ! -name 'tiny-tokens.txt' -delete
+          rm -rf test_wavs
+          echo 'Assets kept for APK:'
+          find . -maxdepth 1 -type f -printf '%f %k KB\n' | sort
+          du -sh .
 
       - name: Apply local Whisper keyboard patch
         run: python3 tools/enable_local_whisper_test.py
+
+      - name: Keep ONNX assets uncompressed
+        run: |
+          cat >> app/build.gradle <<'EOF'
+
+          android {
+              aaptOptions {
+                  noCompress 'onnx'
+              }
+          }
+          EOF
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -44,6 +63,8 @@ jobs:
           gradle-version: '8.9'
 
       - name: Build debug APK
+        env:
+          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g
         run: gradle :app:assembleDebug --stacktrace
 
       - name: Show APK
