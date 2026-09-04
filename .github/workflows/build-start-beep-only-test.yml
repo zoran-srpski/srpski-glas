@@ -15,7 +15,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Apply start-beep-only dictation patch
-        run: python3 tools/enable_start_beep_only_test.py
+        run: |
+          python3 tools/enable_start_beep_only_test.py
+          python3 tools/stop_after_google_result_test.py
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -25,6 +27,6 @@ jobs:
       - name: Upload test APK
         uses: actions/upload-artifact@v4
         with:
-          name: srpski-glas-start-beep-only-test-apk
+          name: srpski-glas-one-session-test-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
